@@ -19,8 +19,8 @@ android {
     }
 }
 
-ext{
-    supportLibVersion="25.3.0"
+ext {
+    supportLibVersion = "25.3.0"
 }
 
 dependencies {
@@ -32,9 +32,25 @@ dependencies {
     compile "com.android.support:design:$supportLibVersion"
     compile "com.android.support:recyclerview-v7:$supportLibVersion"
     compile "com.android.support:cardview-v7:$supportLibVersion"
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta1'
     compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
     compile 'com.jakewharton:butterknife:8.5.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
     testCompile 'junit:junit:4.12'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 }
+
+tasks.whenTaskAdded(new Action<Task>() {
+    @Override
+    void execute(Task task) {
+        if (task.name.contains("lint")//项目中有用到aidl则不可以舍弃这个任务
+                || task.name.contains("Aidl")//用不到测试的时候就可以先关闭
+                || task.name.contains("mockableAndroidJar")
+                || task.name.contains("UnitTest")
+                || task.name.contains("AndroidTest")//用不到NDK和JNI的也关闭掉
+                || task.name.contains("Ndk")
+                || task.name.contains("Jni")
+        ) {
+            task.enabled = false
+        }
+
+    }
+})

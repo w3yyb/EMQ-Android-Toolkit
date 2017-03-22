@@ -1,13 +1,26 @@
 package io.emqtt.emqandroidtoolkit.ui.activity;
 
+import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import butterknife.BindView;
+import butterknife.OnClick;
 import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseActivity;
 
 public class MainActivity extends BaseActivity {
 
+
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+    @BindView(R.id.connection)
+    RecyclerView mConnectionRecyclerView;
+    @BindView(R.id.fab)
+    FloatingActionButton mFab;
 
     @Override
     protected int getLayoutResId() {
@@ -16,12 +29,19 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void setUpView() {
+        setSupportActionBar(mToolbar);
+
 
     }
 
     @Override
     protected void setUpData() {
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -44,5 +64,12 @@ public class MainActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @OnClick(R.id.fab)
+    public void onClick() {
+        ConnectionActivity.openActivity(this,ConnectionActivity.MODE_ADD);
+
     }
 }
