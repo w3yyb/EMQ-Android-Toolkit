@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="io.emqtt.emqandroidtoolkit">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
             android:name=".MyApplication"
             android:allowBackup="true"
@@ -21,6 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.activity.ConnectionActivity">
+        </activity>
+        <activity android:name=".ui.activity.ConnectionDetailActivity">
         </activity>
     </application>
 

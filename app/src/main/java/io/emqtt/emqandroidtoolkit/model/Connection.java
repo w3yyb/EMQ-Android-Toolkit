@@ -78,6 +78,10 @@ public class Connection implements Parcelable {
         this.password = password;
     }
 
+    public String getServerURI() {
+        return "tcp://"+host + ":" + port;
+    }
+
     @Override
     public int describeContents() {
         return 0;

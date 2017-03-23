@@ -13,11 +13,11 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.Connection;
-import io.emqtt.emqandroidtoolkit.ui.base.BaseActivity;
+import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
 
 
-public class ConnectionActivity extends BaseActivity {
+public class ConnectionActivity extends ToolBarActivity {
 
     private static final String EXTRA_MODE = "mode";
     public static final String EXTRA_CONNECTION = "connection";
