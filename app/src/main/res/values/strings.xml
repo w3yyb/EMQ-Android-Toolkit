@@ -10,4 +10,6 @@
     <string name="add_connection">Add</string>
     <string name="save_connection">Save</string>
     <string name="clean_session">Clean Session:</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 </resources>

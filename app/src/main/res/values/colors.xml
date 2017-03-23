@@ -4,5 +4,9 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="primaryText">#DE000000</color>
+    <color name="secondaryText">#8A000000</color>
+
     <color name="md_green_500">#4caf50</color>
+    <color name="md_grey_500">#9E9E9E</color>
 </resources>
