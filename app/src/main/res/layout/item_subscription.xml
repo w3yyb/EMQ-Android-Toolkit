@@ -1,25 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:orientation="horizontal">
-
-
-    <TextView
-            android:id="@+id/topic"
-            android:layout_width="wrap_content"
+<android.support.v7.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/space_tiny"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:theme="@style/CardView.Light"
+>
+    <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/text_margin"
-            tools:text="Topic"
-            android:textAppearance="?attr/textAppearanceListItem"/>
+            android:padding="@dimen/space_small">
 
-    <TextView
-            android:id="@+id/Qos"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/text_margin"
-            tools:text="Qos:1"
+        <TextView
+                android:id="@+id/display_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceListItem"
+                tools:text="@string/topic"/>
 
-    />
-</LinearLayout>
+
+        <TextView
+                android:id="@+id/topic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/display_name"
+                android:layout_marginTop="@dimen/space_small"
+                android:textAppearance="?attr/textAppearanceListItem"
+                tools:text="Topic"/>
+
+        <TextView
+                android:id="@+id/QoS"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/topic"
+                android:layout_alignBottom="@+id/topic"
+                android:layout_marginStart="@dimen/space_large"
+                tools:text="Qos:1"/>
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

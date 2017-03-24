@@ -26,6 +26,8 @@
         </activity>
         <activity android:name=".ui.activity.ConnectionDetailActivity">
         </activity>
+        <activity android:name=".ui.activity.SubscriptionActivity">
+        </activity>
     </application>
 
 </manifest>

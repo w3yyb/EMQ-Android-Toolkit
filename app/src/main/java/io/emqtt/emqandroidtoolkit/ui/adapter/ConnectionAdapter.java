@@ -50,10 +50,10 @@ public class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.Co
     public void onBindViewHolder(final ConnectionViewHolder holder, int position) {
         final Connection connection = mConnectionList.get(position);
         final int pos = holder.getAdapterPosition();
-        holder.mClientIdText.setText(connection.getClintId());
-        holder.mServerText.setText(connection.getHost() + ":" + connection.getPort());
+        holder.clientIdText.setText(connection.getClintId());
+        holder.serverText.setText(connection.getHost() + ":" + connection.getPort());
 
-        holder.mMore.setOnClickListener(new View.OnClickListener() {
+        holder.more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showMenu(v, pos, connection);
@@ -73,7 +73,7 @@ public class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.Co
 
     private void showMenu(View v, final int position, final Connection connection) {
         final PopupMenu popupMenu = new PopupMenu(mContext, v);
-        popupMenu.inflate(R.menu.menu_connection);
+        popupMenu.inflate(R.menu.menu_connection_item);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -108,10 +108,10 @@ public class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.Co
 
 
     static class ConnectionViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.client_id) TextView mClientIdText;
-        @BindView(R.id.server) TextView mServerText;
-        @BindView(R.id.connection_state) ImageView mConnectionStateImage;
-        @BindView(R.id.more) ImageView mMore;
+        @BindView(R.id.client_id) TextView clientIdText;
+        @BindView(R.id.server) TextView serverText;
+        @BindView(R.id.connection_state) ImageView connectionStateImage;
+        @BindView(R.id.more) ImageView more;
 
         ConnectionViewHolder(View view) {
             super(view);

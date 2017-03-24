@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="io.emqtt.emqandroidtoolkit.ui.activity.ConnectionActivity">
+
+    <include layout="@layout/include_base_toolbar"/>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/space_middle"
+            android:paddingEnd="@dimen/space_middle"
+            android:paddingTop="@dimen/space_middle"
+            android:orientation="vertical">
+
+        <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <EditText
+                    android:id="@+id/topic"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri"
+                    android:hint="@string/topic"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <EditText
+                    android:id="@+id/display_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:hint="@string/display_name"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content">
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:text="@string/QoS"/>
+
+            <RadioGroup
+                    android:id="@+id/radio_group_qos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                <RadioButton
+                        android:id="@+id/qos0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"/>
+
+                <RadioButton
+                        android:id="@+id/qos1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:checked="true"
+                        android:text="1"/>
+
+                <RadioButton
+                        android:id="@+id/qos2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2"/>
+            </RadioGroup>
+        </LinearLayout>
+
+
+        <Button android:id="@+id/btn_subscribe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/space_middle"
+                android:text="@string/subscribe"/>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

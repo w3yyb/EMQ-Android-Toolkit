@@ -5,7 +5,7 @@
                 android:layout_height="wrap_content"
                 android:padding="@dimen/space_small"
                 android:orientation="vertical"
-                android:background="@drawable/ripple_bg">
+                android:background="?android:attr/selectableItemBackground">
 
     <TextView
             android:id="@+id/client_id"

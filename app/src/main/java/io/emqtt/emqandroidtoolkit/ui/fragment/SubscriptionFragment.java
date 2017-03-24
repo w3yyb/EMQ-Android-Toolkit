@@ -1,86 +1,37 @@
 package io.emqtt.emqandroidtoolkit.ui.fragment;
 
-import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
 
-import butterknife.BindView;
 import io.emqtt.emqandroidtoolkit.R;
-import io.emqtt.emqandroidtoolkit.model.Subscription;
-import io.emqtt.emqandroidtoolkit.ui.base.BaseFragment;
 
 /**
- *
+ * ClassName: SubscriptionFragment
+ * Desc:
+ * Created by zhiw on 2017/3/24.
  */
-public class SubscriptionFragment extends BaseFragment {
 
-    public static final String TAG = "Subscription";
-
-    @BindView(R.id.subscription_list) RecyclerView mSubscriptionRecyclerView;
-
-    private OnListFragmentInteractionListener mListener;
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
-    public SubscriptionFragment() {
-    }
-
-    public static SubscriptionFragment newInstance() {
-        SubscriptionFragment fragment = new SubscriptionFragment();
-        return fragment;
-    }
-
+public class SubscriptionFragment extends DialogFragment {
 
     @Override
-    protected int getLayoutResId() {
-        return R.layout.fragment_subscription_list;
-    }
-
-    @Override
-    protected void setUpView() {
-        mSubscriptionRecyclerView.setLayoutManager(new LinearLayoutManager(fragmentActivity));
-//        mSubscriptionRecyclerView.setAdapter(new SubscriptionRecyclerViewAdapter(, mListener));
-
-    }
-
-    @Override
-    protected void setUpData() {
-
-    }
-
-
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Subscription item);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View view = inflater.inflate(R.layout.activity_subscription, null);
+        builder.setView(view)
+                .setPositiveButton("Sign in",
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id)
+                            {
+                            }
+                        }).setNegativeButton("Cancel", null);
+        return builder.create();
     }
 }

@@ -28,7 +28,7 @@ public class ConnectionViewPagerAdapter extends FragmentPagerAdapter {
     public ConnectionViewPagerAdapter(FragmentManager fm) {
         super(fm);
         mFragmentList = new ArrayList<>();
-        mFragmentTitleList=new ArrayList<>();
+        mFragmentTitleList = new ArrayList<>();
     }
 
     @Override

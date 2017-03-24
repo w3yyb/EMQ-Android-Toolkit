@@ -6,6 +6,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:theme="@style/AppTheme.AppBarOverlay"
+        app:elevation="3dp"
         tools:showIn="@layout/activity_main">
 
     <android.support.v7.widget.Toolbar

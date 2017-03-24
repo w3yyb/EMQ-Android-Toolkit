@@ -5,24 +5,24 @@ import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseFragment;
 
 
-public class PublicationFragment extends BaseFragment {
+public class PublicationListFragment extends BaseFragment {
 
     public static final String TAG = "Publication";
 
 
-    public PublicationFragment() {
+    public PublicationListFragment() {
         // Required empty public constructor
     }
 
 
-    public static PublicationFragment newInstance() {
-        PublicationFragment fragment = new PublicationFragment();
+    public static PublicationListFragment newInstance() {
+        PublicationListFragment fragment = new PublicationListFragment();
         return fragment;
     }
 
     @Override
     protected int getLayoutResId() {
-        return R.layout.fragment_publication;
+        return R.layout.fragment_publication_list;
     }
 
     @Override

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">EMQAndroidToolkit</string>
     <string name="action_about">About</string>
+
+    <!--add connection-->
     <string name="host">Host</string>
     <string name="port">Port</string>
     <string name="client_id">Client ID</string>
@@ -10,9 +12,15 @@
     <string name="add_connection">Add</string>
     <string name="save_connection">Save</string>
     <string name="clean_session">Clean Session:</string>
+
+    <!--operate connection-->
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--subscribe-->
+    <string name="topic">Topic</string>
+    <string name="display_name">Display name</string>
+    <string name="QoS">QoS</string>
+    <string name="subscribe">Subscribe</string>
+
 </resources>
