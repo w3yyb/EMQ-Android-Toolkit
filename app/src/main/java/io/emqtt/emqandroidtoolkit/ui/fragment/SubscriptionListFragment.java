@@ -9,6 +9,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import io.emqtt.emqandroidtoolkit.R;
+import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
 import io.emqtt.emqandroidtoolkit.ui.adapter.SubscriptionRecyclerViewAdapter;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseFragment;
@@ -85,8 +86,12 @@ public class SubscriptionListFragment extends BaseFragment {
     }
 
     public void addData(Subscription subscription){
-        mSubscriptionList.add(subscription);
-        mAdapter.notifyDataSetChanged();
+        mAdapter.addData(subscription);
+    }
+
+    public void updateData(EmqMessage emqMessage){
+        mAdapter.updateData(emqMessage);
+
     }
 
 

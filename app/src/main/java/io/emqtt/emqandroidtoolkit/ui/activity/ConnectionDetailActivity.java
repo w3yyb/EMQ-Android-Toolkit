@@ -13,7 +13,6 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.CoordinatorLayout;
@@ -31,6 +30,7 @@ import butterknife.OnClick;
 import io.emqtt.emqandroidtoolkit.Constant;
 import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.Connection;
+import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Publication;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
 import io.emqtt.emqandroidtoolkit.ui.adapter.ConnectionViewPagerAdapter;
@@ -220,12 +220,10 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
 
     @Override
     public void messageArrived(final String topic, final MqttMessage message) throws Exception {
-        LogUtil.d("topic is "+topic+"\tmessage is "+message.toString());
+        LogUtil.d("topic is " + topic + "\tmessage is " + message.toString());
         Message msg = mHandler.obtainMessage();
         msg.what = Constant.MQTTStatusConstant.MESSAGE_ARRIVED;
-        msg.obj = message;
-        Bundle bundle = new Bundle();
-        bundle.putString(Constant.ExtraConstant.EXTRA_TOPIC, topic);
+        msg.obj = new EmqMessage(topic, message);
         mHandler.sendMessage(msg);
 
 
@@ -399,8 +397,10 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
                         break;
 
                     case Constant.MQTTStatusConstant.MESSAGE_ARRIVED:
-                        String topic = msg.getData().getString(Constant.ExtraConstant.EXTRA_TOPIC);
-                        MqttMessage mqttMessage = (MqttMessage) msg.obj;
+                        EmqMessage emqMessage = (EmqMessage) msg.obj;
+                        SubscriptionListFragment subscriptionListFragment1 = (SubscriptionListFragment) activity.mAdapter.getItem(0);
+                        subscriptionListFragment1.updateData(emqMessage);
+
                         TipUtil.showSnackbar(activity.mCoordinatorLayout, "New message arrived", "View", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {

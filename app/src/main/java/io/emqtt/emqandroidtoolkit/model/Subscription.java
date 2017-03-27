@@ -19,6 +19,8 @@ public class Subscription implements Parcelable {
 
     private String displayName;
 
+    private EmqMessage message;
+
     public Subscription(String topic, int qos) {
         this.topic = topic;
         QoS = qos;
@@ -46,6 +48,14 @@ public class Subscription implements Parcelable {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public EmqMessage getMessage() {
+        return message;
+    }
+
+    public void setMessage(EmqMessage message) {
+        this.message = message;
     }
 
     @Override
