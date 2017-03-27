@@ -1,13 +1,26 @@
 package io.emqtt.emqandroidtoolkit.ui.fragment;
 
 
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
 import io.emqtt.emqandroidtoolkit.R;
+import io.emqtt.emqandroidtoolkit.model.Publication;
+import io.emqtt.emqandroidtoolkit.ui.adapter.PublicationRecyclerViewAdapter;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseFragment;
 
 
 public class PublicationListFragment extends BaseFragment {
 
     public static final String TAG = "Publication";
+
+    @BindView(R.id.publication_list) RecyclerView mPublicationRecyclerView;
+
+    private PublicationRecyclerViewAdapter mAdapter;
 
 
     public PublicationListFragment() {
@@ -27,11 +40,25 @@ public class PublicationListFragment extends BaseFragment {
 
     @Override
     protected void setUpView() {
+        mPublicationRecyclerView.setLayoutManager(new LinearLayoutManager(fragmentActivity));
 
     }
 
     @Override
     protected void setUpData() {
 
+        List<Publication>  list = new ArrayList<>();
+
+        // TODO: 2017/3/27 Test data
+        Publication subscription1 = new Publication("EMQ/Sample/#","Hello world" ,1,false);
+        list.add(subscription1);
+
+        mAdapter = new PublicationRecyclerViewAdapter(list);
+        mPublicationRecyclerView.setAdapter(mAdapter);
+
+    }
+
+    public void insertData(Publication publication){
+        mAdapter.insertData(publication);
     }
 }

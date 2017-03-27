@@ -22,5 +22,18 @@
     <string name="display_name">Display name</string>
     <string name="QoS">QoS</string>
     <string name="subscribe">Subscribe</string>
+    <string name="publish">Publish</string>
+    <string name="retained">Retained:</string>
+
+
+    <string name="connect">Connect</string>
+    <string name="connecting">Connecting…</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="hint_disconnect">Server is disconnect</string>
+    <string name="connected">Connected</string>
+    <string name="connect_fail">Fail</string>
+
+    <string name="publication">Publication</string>
+    <string name="subscription">Subscription</string>
 
 </resources>
