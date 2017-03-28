@@ -11,6 +11,7 @@ import butterknife.BindView;
 import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
+import io.emqtt.emqandroidtoolkit.ui.activity.DashboardActivity;
 import io.emqtt.emqandroidtoolkit.ui.adapter.SubscriptionRecyclerViewAdapter;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseFragment;
 
@@ -24,8 +25,9 @@ public class SubscriptionListFragment extends BaseFragment {
     @BindView(R.id.subscription_list) RecyclerView mSubscriptionRecyclerView;
 
     private OnListFragmentInteractionListener mListener;
-    private List<Subscription> mSubscriptionList;
     private SubscriptionRecyclerViewAdapter mAdapter;
+
+    private List<String> mTopicList = new ArrayList<>();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -52,17 +54,7 @@ public class SubscriptionListFragment extends BaseFragment {
 
     @Override
     protected void setUpData() {
-        mSubscriptionList = new ArrayList<>();
-
-        // TODO: 2017/3/24 Test data
-        Subscription subscription1 = new Subscription("EMQ/Sample/#", 1);
-        subscription1.setDisplayName("Test");
-        Subscription subscription2 = new Subscription("EMQ/Sample", 2);
-        subscription2.setDisplayName("Test Topic");
-        mSubscriptionList.add(subscription1);
-        mSubscriptionList.add(subscription2);
-
-        mAdapter = new SubscriptionRecyclerViewAdapter(mSubscriptionList, mListener);
+        mAdapter = new SubscriptionRecyclerViewAdapter(((DashboardActivity) fragmentActivity).getSubscriptionList(), mListener);
         mSubscriptionRecyclerView.setAdapter(mAdapter);
     }
 
@@ -87,10 +79,13 @@ public class SubscriptionListFragment extends BaseFragment {
 
     public void addData(Subscription subscription){
         mAdapter.addData(subscription);
+        mTopicList.add(subscription.getTopic());
     }
 
     public void updateData(EmqMessage emqMessage){
-        mAdapter.updateData(emqMessage);
+        if (mTopicList.contains(emqMessage.getTopic())) {
+            mAdapter.updateData(emqMessage);
+        }
 
     }
 

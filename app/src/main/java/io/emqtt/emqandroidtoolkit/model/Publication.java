@@ -105,6 +105,7 @@ public class Publication implements Parcelable {
         dest.writeString(this.payload);
         dest.writeInt(this.QoS);
         dest.writeByte(this.isRetained ? (byte) 1 : (byte) 0);
+        dest.writeString(this.time);
     }
 
     protected Publication(Parcel in) {
@@ -112,6 +113,7 @@ public class Publication implements Parcelable {
         this.payload = in.readString();
         this.QoS = in.readInt();
         this.isRetained = in.readByte() != 0;
+        this.time = in.readString();
     }
 
     public static final Parcelable.Creator<Publication> CREATOR = new Parcelable.Creator<Publication>() {

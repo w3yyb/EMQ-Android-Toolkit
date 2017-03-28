@@ -17,7 +17,7 @@ import butterknife.ButterKnife;
 import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.Connection;
 import io.emqtt.emqandroidtoolkit.ui.OnItemClickListener;
-import io.emqtt.emqandroidtoolkit.ui.activity.ConnectionDetailActivity;
+import io.emqtt.emqandroidtoolkit.ui.activity.DashboardActivity;
 
 /**
  * ClassName: ConnectionAdapter
@@ -63,7 +63,7 @@ public class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.Co
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ConnectionDetailActivity.openActivity(mContext,connection);
+                DashboardActivity.openActivity(mContext,connection);
 
             }
         });

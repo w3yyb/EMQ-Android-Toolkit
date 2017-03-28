@@ -58,11 +58,7 @@ public class MainActivity extends BaseActivity {
 
         mConnectionList = new ArrayList<>();
         // TODO: 2017/3/23 Test data
-        Connection connection1 = new Connection("127.0.0.1", "1883", "EMQ-1241", true);
-        Connection connection2 = new Connection("127.0.0.1", "1883", "EMQ-2131", true);
-        Connection connection3 = new Connection("192.168.0.196", "1883", "EMQ-6789", false);
-        mConnectionList.add(connection1);
-        mConnectionList.add(connection2);
+        Connection connection3 = new Connection("192.168.0.196", "1883", "EMQ-Server", false);
         mConnectionList.add(connection3);
         mConnectionAdapter = new ConnectionAdapter(mConnectionList);
         mConnectionAdapter.setOnItemClickListener(new OnItemClickListener() {

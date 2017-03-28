@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context="io.emqtt.emqandroidtoolkit.ui.activity.ConnectionDetailActivity">
+        tools:context="io.emqtt.emqandroidtoolkit.ui.activity.DashboardActivity">
 
     <include layout="@layout/include_base_toolbar"/>
 

@@ -49,10 +49,6 @@ public class PublicationListFragment extends BaseFragment {
 
         List<Publication>  list = new ArrayList<>();
 
-        // TODO: 2017/3/27 Test data
-        Publication subscription1 = new Publication("EMQ/Sample/#","Hello world" ,1,false);
-        list.add(subscription1);
-
         mAdapter = new PublicationRecyclerViewAdapter(list);
         mPublicationRecyclerView.setAdapter(mAdapter);
 
@@ -60,5 +56,8 @@ public class PublicationListFragment extends BaseFragment {
 
     public void insertData(Publication publication){
         mAdapter.insertData(publication);
+
     }
+
+
 }

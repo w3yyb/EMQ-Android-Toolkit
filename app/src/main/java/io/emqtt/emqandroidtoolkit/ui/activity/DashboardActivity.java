@@ -10,11 +10,12 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Message;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -23,12 +24,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import io.emqtt.emqandroidtoolkit.Constant;
 import io.emqtt.emqandroidtoolkit.R;
+import io.emqtt.emqandroidtoolkit.event.MQTTActionEvent;
+import io.emqtt.emqandroidtoolkit.event.MessageEvent;
 import io.emqtt.emqandroidtoolkit.model.Connection;
 import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Publication;
@@ -40,7 +44,7 @@ import io.emqtt.emqandroidtoolkit.ui.fragment.SubscriptionListFragment;
 import io.emqtt.emqandroidtoolkit.util.LogUtil;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
 
-public class ConnectionDetailActivity extends ToolBarActivity implements SubscriptionListFragment.OnListFragmentInteractionListener, MqttCallback {
+public class DashboardActivity extends ToolBarActivity implements SubscriptionListFragment.OnListFragmentInteractionListener, MqttCallback {
 
     private static final int SUBSCRIPTION = 63;
 
@@ -51,8 +55,6 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
     @BindView(R.id.viewpager) ViewPager mViewpager;
     @BindView(R.id.fab) FloatingActionButton mFab;
 
-    private MyHandler mHandler = new MyHandler(this);
-
     private Connection mConnection;
     private Subscription mSubscription;
     private Publication mPublication;
@@ -60,19 +62,19 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
     private MqttAsyncClient mClient;
     private ConnectionViewPagerAdapter mAdapter;
 
+    private List<Subscription> mSubscriptionList;
+
     private int mCurrentMode = SUBSCRIPTION;
 
     public static void openActivity(Context context, Connection connection) {
-        Intent intent = new Intent(context, ConnectionDetailActivity.class);
+        Intent intent = new Intent(context, DashboardActivity.class);
         intent.putExtra(Constant.ExtraConstant.EXTRA_CONNECTION, connection);
         context.startActivity(intent);
-
-
     }
 
     @Override
     protected int getLayoutResId() {
-        return R.layout.activity_connection_detail;
+        return R.layout.activity_dashboard;
     }
 
     @Override
@@ -86,9 +88,9 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
     @Override
     protected void setUpData() {
 
-        initClient();
+        EventBus.getDefault().register(this);
 
-        connect();
+        initClient();
 
         SubscriptionListFragment subscriptionListFragment = SubscriptionListFragment.newInstance();
         PublicationListFragment publicationListFragment = PublicationListFragment.newInstance();
@@ -122,6 +124,29 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
 
             }
         });
+
+        mSubscriptionList = new ArrayList<>();
+        // TODO: 2017/3/28 Test data
+        Subscription subscription = new Subscription("test", 1);
+        mSubscriptionList.add(subscription);
+
+        connect();
+
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!EventBus.getDefault().isRegistered(this)){
+            EventBus.getDefault().register(this);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -132,19 +157,21 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (!EventBus.getDefault().isRegistered(this)){
+            EventBus.getDefault().register(this);
+        }
+
         if (resultCode == RESULT_OK) {
             if (requestCode == SUBSCRIPTION) {
                 Subscription subscription = data.getParcelableExtra(Constant.ExtraConstant.EXTRA_SUBSCRIPTION);
-                subscribe(subscription);
                 mSubscription = subscription;
-//                SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
-//                subscriptionListFragment.addData(subscription);
+                subscribe(subscription);
 
             }
             if (requestCode == PUBLICATION) {
                 Publication publication = data.getParcelableExtra(Constant.ExtraConstant.EXTRA_PUBLICATION);
-                publish(publication);
                 mPublication = publication;
+                publish(publication);
 
             }
 
@@ -208,13 +235,64 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
 
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(MQTTActionEvent event){
+
+        switch (event.getStatus()) {
+            case Constant.MQTTStatusConstant.CONNECT_SUCCESS:
+                setSubtitle(getString(R.string.connected));
+                invalidateOptionsMenu();
+
+                for (Subscription subscription : mSubscriptionList) {
+                    subscribe(subscription);
+                }
+                break;
+
+            case Constant.MQTTStatusConstant.CONNECT_FAIL:
+                setSubtitle(getString(R.string.connect_fail));
+                break;
+
+            case Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS:
+                SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
+                subscriptionListFragment.addData(mSubscription);
+
+                break;
+
+            case Constant.MQTTStatusConstant.SUBSCRIBE_FAIL:
+                break;
+
+            case Constant.MQTTStatusConstant.PUBLISH_SUCCESS:
+                PublicationListFragment fragment = (PublicationListFragment) mAdapter.getItem(1);
+                fragment.insertData(mPublication);
+                break;
+
+            case Constant.MQTTStatusConstant.PUBLISH_FAIL:
+                TipUtil.showSnackbar(mCoordinatorLayout,"Publish fail");
+                break;
+
+            case Constant.MQTTStatusConstant.CONNECTION_LOST:
+                setSubtitle(getString(R.string.disconnect));
+                invalidateOptionsMenu();
+                break;
+            default:
+                break;
+
+        }
+
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(MessageEvent event){
+        SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
+        subscriptionListFragment.updateData(event.getMessage());
+    }
+
 
     @Override
     public void connectionLost(Throwable cause) {
         LogUtil.e("connectionLost");
-        Message msg = mHandler.obtainMessage();
-        msg.what = Constant.MQTTStatusConstant.CONNECTION_LOST;
-        mHandler.sendMessage(msg);
+        EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECTION_LOST,null,cause));
 
     }
 
@@ -222,10 +300,7 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
     @Override
     public void messageArrived(final String topic, final MqttMessage message) throws Exception {
         LogUtil.d("topic is " + topic + "\tmessage is " + message.toString());
-        Message msg = mHandler.obtainMessage();
-        msg.what = Constant.MQTTStatusConstant.MESSAGE_ARRIVED;
-        msg.obj = new EmqMessage(topic, message);
-        mHandler.sendMessage(msg);
+        EventBus.getDefault().postSticky(new MessageEvent(new EmqMessage(topic, message)));
 
 
     }
@@ -237,6 +312,17 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MessageEvent event = EventBus.getDefault().getStickyEvent(MessageEvent.class);
+        if (event != null) {
+            SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
+            subscriptionListFragment.updateData(event.getMessage());
+        }
+
+
+    }
 
     private void initClient(){
         MqttClientPersistence mqttClientPersistence = new MemoryPersistence();
@@ -258,17 +344,13 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
             mClient.connect(options, "Connect", new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    Message message = mHandler.obtainMessage();
-                    message.what = Constant.MQTTStatusConstant.CONNECT_SUCCESS;
-                    mHandler.sendMessage(message);
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECT_SUCCESS,asyncActionToken));
 
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Message message = mHandler.obtainMessage();
-                    message.what = Constant.MQTTStatusConstant.CONNECT_FAIL;
-                    mHandler.sendMessage(message);
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECT_FAIL,asyncActionToken,exception));
 
                 }
             });
@@ -279,21 +361,19 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
     }
 
     private void subscribe(Subscription subscription){
+        mSubscription = subscription;
         try {
             mClient.subscribe(subscription.getTopic(), subscription.getQoS(), "Subscribe", new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    Message message = mHandler.obtainMessage();
-                    message.what = Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS;
-                    mHandler.sendMessage(message);
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS,asyncActionToken));
 
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Message message = mHandler.obtainMessage();
-                    message.what = Constant.MQTTStatusConstant.SUBSCRIBE_FAIL;
-                    mHandler.sendMessage(message);
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.SUBSCRIBE_FAIL,asyncActionToken,exception));
+
 
                 }
             });
@@ -308,19 +388,17 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
             mClient.publish(publication.getTopic(), publication.getMessage(), "Publish", new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    Message message = mHandler.obtainMessage();
-                    message.what = Constant.MQTTStatusConstant.PUBLISH_SUCCESS;
-                    message.obj = asyncActionToken;
-                    mHandler.sendMessage(message);
+                    LogUtil.d("onSuccess");
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.PUBLISH_SUCCESS,asyncActionToken));
+
 
                 }
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Message message = mHandler.obtainMessage();
-                    message.what = Constant.MQTTStatusConstant.PUBLISH_FAIL;
-                    message.obj = asyncActionToken;
-                    mHandler.sendMessage(message);
+                    LogUtil.d("onFailure");
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.PUBLISH_FAIL,asyncActionToken,exception));
+
 
                 }
             });
@@ -332,11 +410,12 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
     private void disconnect(){
         try {
             mClient.disconnect();
+            setSubtitle(getString(R.string.disconnect));
+            invalidateOptionsMenu();
         } catch (MqttException e) {
             e.printStackTrace();
         }
 
-        updateToolBar();
     }
 
 
@@ -344,83 +423,7 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
         return mClient != null && mClient.isConnected();
     }
 
-    private void updateToolBar(){
-        if (isConnected()){
-
-        }else {
-            setSubtitle(getString(R.string.disconnect));
-            invalidateOptionsMenu();
-        }
+    public List<Subscription> getSubscriptionList() {
+        return mSubscriptionList;
     }
-
-
-
-
-
-
-
-
-    private static class MyHandler extends Handler {
-        private final WeakReference<ConnectionDetailActivity> mActivityWeakReference;
-
-        MyHandler(ConnectionDetailActivity activity) {
-            mActivityWeakReference = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            final ConnectionDetailActivity activity = mActivityWeakReference.get();
-            if (activity != null) {
-                switch (msg.what) {
-                    case Constant.MQTTStatusConstant.CONNECT_SUCCESS:
-                        activity.setSubtitle(activity.getString(R.string.connected));
-                        activity.invalidateOptionsMenu();
-                        break;
-
-                    case Constant.MQTTStatusConstant.CONNECT_FAIL:
-                        activity.setSubtitle(activity.getString(R.string.connect_fail));
-                        break;
-
-                    case Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS:
-                        SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) activity.mAdapter.getItem(0);
-                        subscriptionListFragment.addData(activity.mSubscription);
-                        break;
-
-                    case Constant.MQTTStatusConstant.SUBSCRIBE_FAIL:
-                        break;
-
-                    case Constant.MQTTStatusConstant.PUBLISH_SUCCESS:
-                        PublicationListFragment publicationListFragment=(PublicationListFragment)activity.mAdapter.getItem(1);
-                        publicationListFragment.insertData(activity.mPublication);
-                        break;
-
-                    case Constant.MQTTStatusConstant.PUBLISH_FAIL:
-                        break;
-
-                    case Constant.MQTTStatusConstant.MESSAGE_ARRIVED:
-                        EmqMessage emqMessage = (EmqMessage) msg.obj;
-                        SubscriptionListFragment subscriptionListFragment1 = (SubscriptionListFragment) activity.mAdapter.getItem(0);
-                        subscriptionListFragment1.updateData(emqMessage);
-
-                        TipUtil.showSnackbar(activity.mCoordinatorLayout, "New message arrived", "View", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                            }
-                        });
-                        break;
-
-                    case Constant.MQTTStatusConstant.CONNECTION_LOST:
-                        activity.setSubtitle(activity.getString(R.string.disconnect));
-                        activity.invalidateOptionsMenu();
-                        break;
-
-                    case Constant.MQTTStatusConstant.DELIVERY_COMPLETE:
-                        break;
-
-                }
-
-            }
-        }
-    }
-
 }

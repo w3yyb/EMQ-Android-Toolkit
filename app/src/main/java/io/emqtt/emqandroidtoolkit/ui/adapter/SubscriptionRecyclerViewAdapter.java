@@ -45,7 +45,11 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
 
         final Subscription subscription = mSubscriptionList.get(position);
 
-        holder.displayNameText.setText(subscription.getDisplayName());
+        if (subscription.getDisplayName() == null) {
+            holder.displayNameText.setText(subscription.getTopic());
+        } else {
+            holder.displayNameText.setText(subscription.getDisplayName());
+        }
         holder.topicText.setText("Topic:" + subscription.getTopic());
         holder.QoSText.setText("QoSText:" + subscription.getQoS());
         if (null != subscription.getMessage()) {
