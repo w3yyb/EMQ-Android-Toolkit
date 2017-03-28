@@ -26,11 +26,15 @@
         </activity>
         <activity android:name=".ui.activity.ConnectionDetailActivity">
         </activity>
-        <activity android:name=".ui.activity.SubscriptionActivity"
-                  android:label="@string/subscription">
+        <activity
+                android:name=".ui.activity.SubscriptionActivity"
+                android:label="@string/subscription">
         </activity>
-        <activity android:name=".ui.activity.PublicationActivity"
-                  android:label="@string/publication">
+        <activity
+                android:name=".ui.activity.PublicationActivity"
+                android:label="@string/publication">
+        </activity>
+        <activity android:name=".ui.activity.MessageListActivity">
         </activity>
     </application>
 

@@ -21,8 +21,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/display_name"
                 android:layout_marginTop="@dimen/space_small"
-                android:textAppearance="?attr/textAppearanceListItem"
-                tools:text="Topic"/>
+                tools:text="Topic"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"/>
 
         <TextView
                 android:id="@+id/payload"
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/topic"
                 android:layout_marginTop="@dimen/space_small"
-                android:textAppearance="?attr/textAppearanceListItem"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 tools:text="Payload"/>
 
         <TextView
@@ -48,9 +48,18 @@
                 android:layout_toRightOf="@id/QoS"
                 android:layout_alignBottom="@id/QoS"
                 android:layout_marginStart="@dimen/space_middle"
-                android:text="Retained"
+                android:text="@string/retained"
                 android:visibility="invisible"
                 tools:visibility="visible"
+        />
+
+        <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignBottom="@id/topic"
+                tools:text="3-27 18:00"
         />
 
 

@@ -2,8 +2,7 @@ package io.emqtt.emqandroidtoolkit.model;
 
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import io.emqtt.emqandroidtoolkit.util.StringUtil;
 
 /**
  * ClassName: EmqMessage
@@ -22,8 +21,7 @@ public class EmqMessage {
     public EmqMessage(String topic, MqttMessage mqttMessage) {
         this.topic = topic;
         this.mqttMessage = mqttMessage;
-        SimpleDateFormat format = new SimpleDateFormat("MM-dd HH:mm", Locale.getDefault());
-        this.updateTime = format.format(System.currentTimeMillis());
+        this.updateTime = StringUtil.formatNow();
     }
 
     public String getTopic() {

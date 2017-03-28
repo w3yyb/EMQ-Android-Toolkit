@@ -90,7 +90,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
 
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.display_name) TextView displayNameText;
         @BindView(R.id.topic) TextView topicText;
@@ -98,7 +98,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         @BindView(R.id.payload) TextView payloadText;
         @BindView(R.id.time) TextView timeText;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, itemView);
 

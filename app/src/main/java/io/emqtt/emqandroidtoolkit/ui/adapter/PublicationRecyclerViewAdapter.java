@@ -41,6 +41,7 @@ public class PublicationRecyclerViewAdapter extends RecyclerView.Adapter<Publica
         holder.QoSText.setText("QoS:" + publication.getQoS());
         holder.payloadText.setText("Payload:" + publication.getPayload());
         holder.retainedText.setVisibility(publication.isRetained() ? View.VISIBLE : View.INVISIBLE);
+        holder.timeText.setText(publication.getTime());
 
     }
 
@@ -60,6 +61,7 @@ public class PublicationRecyclerViewAdapter extends RecyclerView.Adapter<Publica
         @BindView(R.id.payload) TextView payloadText;
         @BindView(R.id.QoS) TextView QoSText;
         @BindView(R.id.retained) TextView retainedText;
+        @BindView(R.id.time) TextView timeText;
 
         ViewHolder(View view) {
             super(view);

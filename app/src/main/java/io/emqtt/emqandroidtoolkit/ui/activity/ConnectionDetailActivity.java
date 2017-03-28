@@ -126,6 +126,7 @@ public class ConnectionDetailActivity extends ToolBarActivity implements Subscri
 
     @Override
     public void onListFragmentInteraction(Subscription item) {
+        MessageListActivity.openActivity(this,item);
 
     }
 
