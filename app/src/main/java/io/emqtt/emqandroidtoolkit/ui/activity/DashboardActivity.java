@@ -16,13 +16,16 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +45,9 @@ import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
 import io.emqtt.emqandroidtoolkit.ui.fragment.PublicationListFragment;
 import io.emqtt.emqandroidtoolkit.ui.fragment.SubscriptionListFragment;
 import io.emqtt.emqandroidtoolkit.util.LogUtil;
+import io.emqtt.emqandroidtoolkit.util.RealmHelper;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
+import io.realm.Realm;
 
 public class DashboardActivity extends ToolBarActivity implements SubscriptionListFragment.OnListFragmentInteractionListener, MqttCallback {
 
@@ -82,7 +87,23 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
         mConnection = getIntent().getParcelableExtra(Constant.ExtraConstant.EXTRA_CONNECTION);
         setTitle(mConnection.getServerURI());
         setSubtitle(getString(R.string.connecting) );
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayDialog();
 
+            }
+        });
+
+    }
+
+    private void displayDialog() {
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_connection_status, null);
+        ((TextView)view.findViewById(R.id.server)).setText(mConnection.getServerURI());
+        ((TextView)view.findViewById(R.id.client_id)).setText(mConnection.getClintId());
+        dialog.setContentView(view);
+        dialog.show();
     }
 
     @Override
@@ -126,9 +147,14 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
         });
 
         mSubscriptionList = new ArrayList<>();
-        // TODO: 2017/3/28 Test data
-        Subscription subscription = new Subscription("test", 1);
-        mSubscriptionList.add(subscription);
+
+        Realm realm = RealmHelper.getInstance().getRealm();
+        realm.beginTransaction();
+        List<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClintId()).findAll();
+        realm.commitTransaction();
+        if (list != null) {
+            mSubscriptionList.addAll(list);
+        }
 
         connect();
 
@@ -143,6 +169,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
     @Override
     public void onItemDelete(int position, Subscription item) {
+        RealmHelper.getInstance().delete(item);
 
     }
 
@@ -166,6 +193,8 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
         if (resultCode == RESULT_OK) {
             if (requestCode == SUBSCRIPTION) {
                 Subscription subscription = data.getParcelableExtra(Constant.ExtraConstant.EXTRA_SUBSCRIPTION);
+                subscription.setClientId(mConnection.getClintId());
+                RealmHelper.getInstance().addData(subscription);
                 mSubscription = subscription;
                 subscribe(subscription);
 
@@ -255,20 +284,23 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
                 break;
 
             case Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS:
-                LogUtil.d("subscribe success");
+                TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.subscribe_success));
                 SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
                 subscriptionListFragment.addData(mSubscription);
 
                 break;
 
             case Constant.MQTTStatusConstant.SUBSCRIBE_FAIL:
+                TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.subscribe_fail));
                 break;
 
             case Constant.MQTTStatusConstant.UNSUBSCRIBE_SUCCESS:
-                LogUtil.d("unsubscribe success");
+                TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.unsubscurbe_success));
                 break;
 
             case Constant.MQTTStatusConstant.UNSUBSCRIBE_FAIL:
+                TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.unsubscirbe_fail));
+
                 break;
 
             case Constant.MQTTStatusConstant.PUBLISH_SUCCESS:
@@ -277,7 +309,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
                 break;
 
             case Constant.MQTTStatusConstant.PUBLISH_FAIL:
-                TipUtil.showSnackbar(mCoordinatorLayout,"Publish fail");
+                TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.publish_fail));
                 break;
 
             case Constant.MQTTStatusConstant.CONNECTION_LOST:

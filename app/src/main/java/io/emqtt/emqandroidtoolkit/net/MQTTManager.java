@@ -16,7 +16,7 @@ public class MQTTManager {
     private static MQTTManager INSTANCE;
 
 
-    public static MQTTManager newInstance() {
+    public static MQTTManager getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new MQTTManager();
         }

@@ -20,6 +20,7 @@ import io.emqtt.emqandroidtoolkit.ui.OnItemClickListener;
 import io.emqtt.emqandroidtoolkit.ui.adapter.ConnectionAdapter;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseActivity;
 import io.emqtt.emqandroidtoolkit.ui.widget.RecyclerViewDivider;
+import io.emqtt.emqandroidtoolkit.util.RealmHelper;
 
 
 public class MainActivity extends BaseActivity {
@@ -57,9 +58,11 @@ public class MainActivity extends BaseActivity {
     protected void setUpData() {
 
         mConnectionList = new ArrayList<>();
-        // TODO: 2017/3/23 Test data
-        Connection connection3 = new Connection("192.168.0.196", "1883", "EMQ-Server", false);
-        mConnectionList.add(connection3);
+        List<Connection> list = RealmHelper.getInstance().queryAll(Connection.class);
+        if (list != null) {
+            mConnectionList.addAll(list);
+        }
+
         mConnectionAdapter = new ConnectionAdapter(mConnectionList);
         mConnectionAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override

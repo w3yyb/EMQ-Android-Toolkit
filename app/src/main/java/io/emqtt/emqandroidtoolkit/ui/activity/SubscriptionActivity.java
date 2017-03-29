@@ -12,6 +12,9 @@ import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
 import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
 import io.emqtt.emqandroidtoolkit.ui.widget.QoSChooseLayout;
+import io.emqtt.emqandroidtoolkit.util.TipUtil;
+
+import static io.emqtt.emqandroidtoolkit.R.id.qos;
 
 public class SubscriptionActivity extends ToolBarActivity {
 
@@ -20,7 +23,7 @@ public class SubscriptionActivity extends ToolBarActivity {
     @BindView(R.id.display_name) EditText mDisplayName;
     @BindView(R.id.btn_subscribe) Button mSubscribeBtn;
     @BindView(R.id.linear_layout) LinearLayout mLinearLayout;
-    @BindView(R.id.qos) QoSChooseLayout mQoSLayout;
+    @BindView(qos) QoSChooseLayout mQoSLayout;
 
 
 
@@ -43,6 +46,10 @@ public class SubscriptionActivity extends ToolBarActivity {
     @OnClick(R.id.btn_subscribe)
     public void onViewClicked() {
         String topic = mTopic.getText().toString().trim();
+        if (topic.isEmpty()){
+            TipUtil.showSnackbar(mLinearLayout,"Invalid topic length");
+            return;
+        }
         int qos = mQoSLayout.getQoS();
 
         Subscription subscription = new Subscription(topic, qos);

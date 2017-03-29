@@ -3,13 +3,15 @@ package io.emqtt.emqandroidtoolkit.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import io.realm.RealmObject;
+
 /**
  * ClassName: Connection
  * Desc:
  * Created by zhiw on 2017/3/22.
  */
 
-public class Connection implements Parcelable {
+public class Connection extends RealmObject implements Parcelable {
 
     private String host;
 
@@ -22,6 +24,10 @@ public class Connection implements Parcelable {
     private String username;
 
     private String password;
+
+
+    public Connection() {
+    }
 
     public Connection(String host, String port, String clintId, boolean cleanSession) {
         this.host = host;
@@ -81,6 +87,7 @@ public class Connection implements Parcelable {
     public String getServerURI() {
         return "tcp://"+host + ":" + port;
     }
+
 
     @Override
     public int describeContents() {

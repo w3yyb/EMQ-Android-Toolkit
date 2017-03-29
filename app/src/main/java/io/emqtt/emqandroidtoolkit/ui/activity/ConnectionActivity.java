@@ -14,6 +14,7 @@ import butterknife.OnClick;
 import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.Connection;
 import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
+import io.emqtt.emqandroidtoolkit.util.RealmHelper;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
 
 
@@ -110,9 +111,12 @@ public class ConnectionActivity extends ToolBarActivity {
             TipUtil.showSnackbar(mLinearLayout, "Port cannot be empty");
             return;
         }
+
+        Connection connection = getConnection();
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_CONNECTION, getConnection());
+        intent.putExtra(EXTRA_CONNECTION, connection);
         setResult(RESULT_OK, intent);
+        RealmHelper.getInstance().addData(connection);
         finish();
 
     }

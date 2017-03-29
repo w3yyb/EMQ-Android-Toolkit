@@ -95,8 +95,12 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
                 switch (item.getItemId()) {
                     case R.id.action_delete:
                         if (mListener != null) {
-                            mListener.onItemUnsubcribe(position,subscription);
+                            mListener.onItemDelete(position, subscription);
                         }
+                        removeData(position);
+//                        if (mListener != null) {
+//                            mListener.onItemUnsubcribe(position,subscription);
+//                        }
 
                         return true;
 

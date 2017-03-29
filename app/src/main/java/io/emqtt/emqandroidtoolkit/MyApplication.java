@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 import io.emqtt.emqandroidtoolkit.util.LogUtil;
+import io.realm.Realm;
 
 /**
  * ClassName: MyApplication
@@ -21,6 +22,9 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         sContext = getApplicationContext();
+
+        Realm.init(this);
+
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {

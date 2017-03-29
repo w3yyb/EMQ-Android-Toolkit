@@ -37,4 +37,10 @@
     <string name="subscription">Subscription</string>
     <string name="unsubscribe">Unsubscribe</string>
 
+    <string name="subscribe_success">Subscribe success</string>
+    <string name="subscribe_fail">Subscribe fail</string>
+    <string name="unsubscurbe_success">Unsubscribe success</string>
+    <string name="unsubscirbe_fail">Unsubscribe fail</string>
+    <string name="publish_fail">Publish fail</string>
+
 </resources>
