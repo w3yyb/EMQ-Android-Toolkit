@@ -1,10 +1,14 @@
 package io.emqtt.emqandroidtoolkit.ui.adapter;
 
+import android.content.Context;
 import android.support.v4.util.ArrayMap;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -22,6 +26,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     private final List<Subscription> mSubscriptionList;
     private ArrayMap<String ,Integer> mArrayMap;
     private final OnListFragmentInteractionListener mListener;
+    private Context mContext;
 
 
     public SubscriptionRecyclerViewAdapter(List<Subscription> items, OnListFragmentInteractionListener listener) {
@@ -37,11 +42,12 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_subscription, parent, false);
+        mContext = parent.getContext();
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
 
         final Subscription subscription = mSubscriptionList.get(position);
 
@@ -57,11 +63,19 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
             holder.timeText.setText(subscription.getMessage().getUpdateTime());
         }
 
+        holder.moreImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMenu(v, position, subscription);
+
+            }
+        });
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    mListener.onListFragmentInteraction(subscription);
+                    mListener.onItemClick(position,subscription);
                 }
             }
         });
@@ -70,6 +84,40 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     @Override
     public int getItemCount() {
         return mSubscriptionList.size();
+    }
+
+    private void showMenu(View v, final int position, final Subscription subscription) {
+        final PopupMenu popupMenu = new PopupMenu(mContext, v);
+        popupMenu.inflate(R.menu.menu_subscription);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_delete:
+                        if (mListener != null) {
+                            mListener.onItemUnsubcribe(position,subscription);
+                        }
+
+                        return true;
+
+                    case R.id.action_subscribe:
+                        if (mListener != null) {
+                            mListener.onItemSubscribe(position, subscription);
+                        }
+                        return true;
+
+                    case R.id.action_unsubscribe:
+                        if (mListener != null) {
+                            mListener.onItemUnsubcribe(position,subscription);
+                        }
+
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+        popupMenu.show();
     }
 
     public void addData(Subscription subscription){
@@ -92,6 +140,13 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
 
     }
 
+    public void removeData(int position){
+        mSubscriptionList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position,getItemCount());
+
+    }
+
 
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -101,6 +156,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         @BindView(R.id.QoS) TextView QoSText;
         @BindView(R.id.payload) TextView payloadText;
         @BindView(R.id.time) TextView timeText;
+        @BindView(R.id.more) ImageView moreImage;
 
         ViewHolder(View view) {
             super(view);

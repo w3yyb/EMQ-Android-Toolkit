@@ -32,15 +32,19 @@ public class Constant {
 
         public static final int SUBSCRIBE_FAIL = 103;
 
-        public static final int PUBLISH_SUCCESS = 104;
+        public static final int UNSUBSCRIBE_SUCCESS = 104;
 
-        public static final int PUBLISH_FAIL = 105;
+        public static final int UNSUBSCRIBE_FAIL = 105;
 
-        public static final int MESSAGE_ARRIVED = 106;
+        public static final int PUBLISH_SUCCESS = 106;
 
-        public static final int CONNECTION_LOST = 107;
+        public static final int PUBLISH_FAIL = 107;
 
-        public static final int DELIVERY_COMPLETE = 108;
+        public static final int MESSAGE_ARRIVED = 108;
+
+        public static final int CONNECTION_LOST = 109;
+
+        public static final int DELIVERY_COMPLETE = 110;
     }
 
 }

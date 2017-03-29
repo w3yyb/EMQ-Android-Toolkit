@@ -35,5 +35,6 @@
 
     <string name="publication">Publication</string>
     <string name="subscription">Subscription</string>
+    <string name="unsubscribe">Unsubscribe</string>
 
 </resources>

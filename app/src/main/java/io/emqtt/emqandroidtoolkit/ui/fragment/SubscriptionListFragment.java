@@ -78,8 +78,11 @@ public class SubscriptionListFragment extends BaseFragment {
     }
 
     public void addData(Subscription subscription){
-        mAdapter.addData(subscription);
-        mTopicList.add(subscription.getTopic());
+        if (!mTopicList.contains(subscription.getTopic())){
+            mAdapter.addData(subscription);
+            mTopicList.add(subscription.getTopic());
+        }
+
     }
 
     public void updateData(EmqMessage emqMessage){
@@ -101,6 +104,13 @@ public class SubscriptionListFragment extends BaseFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(Subscription item);
+
+        void onItemClick(int position,Subscription item);
+
+        void onItemDelete(int position,Subscription item);
+
+        void onItemSubscribe(int position,Subscription item);
+
+        void onItemUnsubcribe(int position,Subscription item);
     }
 }

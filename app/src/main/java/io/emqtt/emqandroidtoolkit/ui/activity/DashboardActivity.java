@@ -136,22 +136,24 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        if (!EventBus.getDefault().isRegistered(this)){
-            EventBus.getDefault().register(this);
-        }
+    public void onItemClick(int position, Subscription item) {
+        MessageListActivity.openActivity(this, item);
+
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        EventBus.getDefault().unregister(this);
+    public void onItemDelete(int position, Subscription item) {
+
     }
 
     @Override
-    public void onListFragmentInteraction(Subscription item) {
-        MessageListActivity.openActivity(this,item);
+    public void onItemSubscribe(int position, Subscription item) {
+        subscribe(item);
+    }
+
+    @Override
+    public void onItemUnsubcribe(int position, Subscription item) {
+        unsubscribe(item);
 
     }
 
@@ -253,12 +255,20 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
                 break;
 
             case Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS:
+                LogUtil.d("subscribe success");
                 SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
                 subscriptionListFragment.addData(mSubscription);
 
                 break;
 
             case Constant.MQTTStatusConstant.SUBSCRIBE_FAIL:
+                break;
+
+            case Constant.MQTTStatusConstant.UNSUBSCRIBE_SUCCESS:
+                LogUtil.d("unsubscribe success");
+                break;
+
+            case Constant.MQTTStatusConstant.UNSUBSCRIBE_FAIL:
                 break;
 
             case Constant.MQTTStatusConstant.PUBLISH_SUCCESS:
@@ -312,6 +322,16 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+    }
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -321,8 +341,15 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
             subscriptionListFragment.updateData(event.getMessage());
         }
 
-
     }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
 
     private void initClient(){
         MqttClientPersistence mqttClientPersistence = new MemoryPersistence();
@@ -373,6 +400,27 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.SUBSCRIBE_FAIL,asyncActionToken,exception));
+
+
+                }
+            });
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void unsubscribe(Subscription subscription){
+        try {
+            mClient.unsubscribe(subscription.getTopic(), "Unsubscribe", new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.UNSUBSCRIBE_SUCCESS,asyncActionToken));
+
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.UNSUBSCRIBE_FAIL,asyncActionToken,exception));
 
 
                 }
