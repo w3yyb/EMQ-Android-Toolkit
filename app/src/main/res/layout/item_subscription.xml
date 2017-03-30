@@ -16,6 +16,7 @@
 
         <TextView
                 android:id="@+id/display_name"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceListItem"
@@ -24,11 +25,10 @@
 
         <TextView
                 android:id="@+id/topic"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/display_name"
-                android:layout_marginTop="@dimen/space_small"
                 android:textAppearance="?attr/textAppearanceListItem"
                 tools:text="Topic"/>
 
@@ -44,7 +44,7 @@
                 android:id="@+id/payload"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/display_name"
+                android:layout_below="@id/topic"
                 android:layout_marginTop="@dimen/space_small"
                 android:maxLines="1"
                 tools:text="Hello World"/>
@@ -54,7 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_toStartOf="@+id/more"
-                android:layout_alignBottom="@id/display_name"
+                android:layout_alignBottom="@id/topic"
                 tools:text="2017-3-27"/>
 
         <ImageView

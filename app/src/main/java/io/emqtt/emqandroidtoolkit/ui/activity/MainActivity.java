@@ -16,11 +16,13 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.Connection;
+import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.ui.OnItemClickListener;
 import io.emqtt.emqandroidtoolkit.ui.adapter.ConnectionAdapter;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseActivity;
 import io.emqtt.emqandroidtoolkit.ui.widget.RecyclerViewDivider;
 import io.emqtt.emqandroidtoolkit.util.RealmHelper;
+import io.realm.RealmResults;
 
 
 public class MainActivity extends BaseActivity {
@@ -58,7 +60,7 @@ public class MainActivity extends BaseActivity {
     protected void setUpData() {
 
         mConnectionList = new ArrayList<>();
-        List<Connection> list = RealmHelper.getInstance().queryAll(Connection.class);
+        RealmResults<Connection> list = RealmHelper.getInstance().queryAll(Connection.class);
         if (list != null) {
             mConnectionList.addAll(list);
         }
@@ -129,4 +131,11 @@ public class MainActivity extends BaseActivity {
     public void onClick() {
         ConnectionActivity.openActivityForResult(this, ConnectionActivity.MODE_ADD, REQUEST_ADD);
     }
+
+    @Override
+    protected void onDestroy() {
+        RealmHelper.getInstance().deleteAll(EmqMessage.class);
+        super.onDestroy();
+    }
+
 }

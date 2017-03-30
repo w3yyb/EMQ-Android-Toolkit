@@ -48,6 +48,7 @@ import io.emqtt.emqandroidtoolkit.util.LogUtil;
 import io.emqtt.emqandroidtoolkit.util.RealmHelper;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class DashboardActivity extends ToolBarActivity implements SubscriptionListFragment.OnListFragmentInteractionListener, MqttCallback {
 
@@ -150,7 +151,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
         Realm realm = RealmHelper.getInstance().getRealm();
         realm.beginTransaction();
-        List<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClintId()).findAll();
+        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClintId()).findAll();
         realm.commitTransaction();
         if (list != null) {
             mSubscriptionList.addAll(list);
@@ -328,6 +329,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
     public void onEvent(MessageEvent event){
         SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
         subscriptionListFragment.updateData(event.getMessage());
+        RealmHelper.getInstance().addData(event.getMessage());
     }
 
 

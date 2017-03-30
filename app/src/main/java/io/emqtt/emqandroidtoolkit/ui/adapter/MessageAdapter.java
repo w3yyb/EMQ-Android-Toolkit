@@ -37,7 +37,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
         EmqMessage message = mMessageList.get(position);
-        holder.payloadText.setText(new String(message.getMqttMessage().getPayload()));
+        holder.payloadText.setText(message.getPayload());
         holder.timeText.setText(message.getUpdateTime());
 
     }
@@ -48,8 +48,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     public void insertData(EmqMessage message) {
-        mMessageList.add(0, message);
-        notifyItemInserted(0);
+        mMessageList.add(message);
+        notifyItemInserted(getItemCount());
+
+    }
+
+    public void deleteAll(){
+        mMessageList.clear();
+        notifyDataSetChanged();
     }
 
     class MessageViewHolder extends RecyclerView.ViewHolder {

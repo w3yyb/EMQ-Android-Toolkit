@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +23,9 @@ import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
 import io.emqtt.emqandroidtoolkit.ui.adapter.MessageAdapter;
 import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
-import io.emqtt.emqandroidtoolkit.util.LogUtil;
+import io.emqtt.emqandroidtoolkit.ui.widget.RecyclerViewDivider;
+import io.emqtt.emqandroidtoolkit.util.RealmHelper;
+import io.realm.RealmResults;
 
 public class MessageListActivity extends ToolBarActivity {
 
@@ -48,6 +52,7 @@ public class MessageListActivity extends ToolBarActivity {
     @Override
     protected void setUpView() {
         mMessageRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mMessageRecyclerView.addItemDecoration(new RecyclerViewDivider(this));
         mSubscription = getIntent().getParcelableExtra(Constant.ExtraConstant.EXTRA_SUBSCRIPTION);
         setTitle(mSubscription.getTopic());
 
@@ -57,6 +62,8 @@ public class MessageListActivity extends ToolBarActivity {
     @Override
     protected void setUpData() {
         mMessageList = new ArrayList<>();
+        RealmResults<EmqMessage> list = RealmHelper.getInstance().queryTopicMessage(EmqMessage.class, mSubscription.getTopic());
+        mMessageList.addAll(list);
         mAdapter = new MessageAdapter(mMessageList);
         mMessageRecyclerView.setAdapter(mAdapter);
 
@@ -74,8 +81,29 @@ public class MessageListActivity extends ToolBarActivity {
         EventBus.getDefault().unregister(this);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_message_list,menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_delete) {
+            mAdapter.deleteAll();
+            RealmHelper.getInstance().deleteTopic(EmqMessage.class, mSubscription.getTopic());
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(MessageEvent event){
         mAdapter.insertData(event.getMessage());
+        RealmHelper.getInstance().addData(event.getMessage());
+        mMessageRecyclerView.smoothScrollToPosition(mAdapter.getItemCount());
     }
 }
