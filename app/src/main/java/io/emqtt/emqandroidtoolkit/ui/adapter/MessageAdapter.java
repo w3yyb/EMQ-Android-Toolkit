@@ -37,8 +37,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
         EmqMessage message = mMessageList.get(position);
-        holder.payloadText.setText(message.getPayload());
+        holder.payloadText.setText("Payload:" + message.getPayload());
         holder.timeText.setText(message.getUpdateTime());
+        holder.qosText.setText("QoS:" + message.getQos());
+        holder.retainedText.setText("Retained:" + message.isRetained());
 
     }
 
@@ -53,7 +55,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     }
 
-    public void deleteAll(){
+    public void deleteAll() {
         mMessageList.clear();
         notifyDataSetChanged();
     }
@@ -62,6 +64,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         @BindView(R.id.time) TextView timeText;
         @BindView(R.id.payload) TextView payloadText;
+        @BindView(R.id.qos) TextView qosText;
+        @BindView(R.id.retained) TextView retainedText;
 
         MessageViewHolder(View itemView) {
             super(itemView);

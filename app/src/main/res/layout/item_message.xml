@@ -3,22 +3,36 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:orientation="horizontal">
+              android:padding="12dp"
+              android:orientation="vertical">
 
-    <TextView
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/space_small"
-            tools:text="3-27 12:00:24"
-    />
 
     <TextView
             android:id="@+id/payload"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/space_small"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             tools:text="Message from MQTT"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/qos"
+            tools:text="QoS:1"
+    />
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/retained"
+            tools:text="Retained"
+    />
+
+    <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="3-27 12:00:24"
+    />
+
 
 </LinearLayout>

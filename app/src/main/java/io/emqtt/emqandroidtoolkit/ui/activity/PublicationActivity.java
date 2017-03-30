@@ -51,7 +51,6 @@ public class PublicationActivity extends ToolBarActivity {
         boolean isRetained = mRetainedSwitch.isChecked();
 
         Publication publication = new Publication(topic, payload, qos, isRetained);
-        publication.setTime();
 
         Intent intent = new Intent();
         intent.putExtra(Constant.ExtraConstant.EXTRA_PUBLICATION, publication);

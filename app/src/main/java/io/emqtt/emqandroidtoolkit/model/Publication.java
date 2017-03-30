@@ -5,12 +5,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 import io.emqtt.emqandroidtoolkit.util.StringUtil;
-
-import static android.R.attr.format;
 
 /**
  * ClassName: Publication
@@ -38,6 +33,7 @@ public class Publication implements Parcelable {
         this.payload = payload;
         QoS = qoS;
         this.isRetained = isRetained;
+        this.time = StringUtil.formatNow();
     }
 
     public String getTopic() {

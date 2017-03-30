@@ -54,7 +54,11 @@ public class SubscriptionListFragment extends BaseFragment {
 
     @Override
     protected void setUpData() {
-        mAdapter = new SubscriptionRecyclerViewAdapter(((DashboardActivity) fragmentActivity).getSubscriptionList(), mListener);
+        List<Subscription> list = ((DashboardActivity) fragmentActivity).getSubscriptionList();
+        for (Subscription subscription : list) {
+            mTopicList.add(subscription.getTopic());
+        }
+        mAdapter = new SubscriptionRecyclerViewAdapter(list, mListener);
         mSubscriptionRecyclerView.setAdapter(mAdapter);
     }
 
