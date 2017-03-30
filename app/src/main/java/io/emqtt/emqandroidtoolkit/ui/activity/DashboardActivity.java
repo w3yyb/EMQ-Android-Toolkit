@@ -21,6 +21,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,6 +58,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
     private static final int PUBLICATION = 64;
 
     @BindView(R.id.coordinator_layout) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.tab_layout) TabLayout mTabLayout;
     @BindView(R.id.viewpager) ViewPager mViewpager;
     @BindView(R.id.fab) FloatingActionButton mFab;
@@ -74,6 +76,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
     public static void openActivity(Context context, Connection connection) {
         Intent intent = new Intent(context, DashboardActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra(Constant.ExtraConstant.EXTRA_CONNECTION, connection);
         context.startActivity(intent);
     }
@@ -95,7 +98,6 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
             }
         });
-
     }
 
     private void displayDialog() {
@@ -112,7 +114,16 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
         EventBus.getDefault().register(this);
 
-        initClient();
+        mSubscriptionList = new ArrayList<>();
+
+        Realm realm = RealmHelper.getInstance().getRealm();
+        realm.beginTransaction();
+        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClintId()).findAll();
+        realm.commitTransaction();
+        if (list != null) {
+            mSubscriptionList.addAll(list);
+        }
+
 
         SubscriptionListFragment subscriptionListFragment = SubscriptionListFragment.newInstance();
         PublicationListFragment publicationListFragment = PublicationListFragment.newInstance();
@@ -147,15 +158,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
             }
         });
 
-        mSubscriptionList = new ArrayList<>();
-
-        Realm realm = RealmHelper.getInstance().getRealm();
-        realm.beginTransaction();
-        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClintId()).findAll();
-        realm.commitTransaction();
-        if (list != null) {
-            mSubscriptionList.addAll(list);
-        }
+        initClient();
 
         connect();
 
@@ -327,6 +330,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(MessageEvent event){
+        LogUtil.d("onMessageEvent");
         SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
         subscriptionListFragment.updateData(event.getMessage());
         RealmHelper.getInstance().addData(event.getMessage());
@@ -343,7 +347,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
     @Override
     public void messageArrived(final String topic, final MqttMessage message) throws Exception {
-        LogUtil.d("topic is " + topic + "\tmessage is " + message.toString());
+        LogUtil.d("topic is " + topic + ",message is " + message.toString()+", qos is "+message.getQos());
         EventBus.getDefault().postSticky(new MessageEvent(new EmqMessage(topic, message)));
 
 
@@ -382,6 +386,21 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
     public void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(DashboardActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
+
+
+    private void setSubtitle(String subtitle) {
+        if (mToolbar != null) {
+            mToolbar.setSubtitle(subtitle);
+        }
     }
 
 
@@ -470,7 +489,6 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
             mClient.publish(publication.getTopic(), publication.getMessage(), "Publish", new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    LogUtil.d("onSuccess");
                     EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.PUBLISH_SUCCESS,asyncActionToken));
 
 
@@ -478,7 +496,6 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    LogUtil.d("onFailure");
                     EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.PUBLISH_FAIL,asyncActionToken,exception));
 
 
