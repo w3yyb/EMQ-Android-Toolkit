@@ -22,7 +22,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.ConnectionActivity">
+        <activity android:name=".ui.activity.ConnectionActivity"
+                  android:label="@string/connection">
         </activity>
         <activity android:name=".ui.activity.DashboardActivity">
         </activity>

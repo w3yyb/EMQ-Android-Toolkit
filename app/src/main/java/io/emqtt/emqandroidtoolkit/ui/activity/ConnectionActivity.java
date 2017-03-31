@@ -75,8 +75,6 @@ public class ConnectionActivity extends ToolBarActivity {
     @Override
     protected void setUpView() {
 
-        setTitle("Connection");
-
         mMode = getIntent().getIntExtra(EXTRA_MODE, MODE_ADD);
         if (isAddMode()) {
             mOperateConnectionButton.setText(R.string.add_connection);

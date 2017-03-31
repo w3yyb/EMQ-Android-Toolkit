@@ -33,6 +33,7 @@
     <string name="connected">Connected</string>
     <string name="connect_fail">Fail</string>
 
+    <string name="connection">Connection</string>
     <string name="publication">Publication</string>
     <string name="subscription">Subscription</string>
     <string name="unsubscribe">Unsubscribe</string>

@@ -1,15 +1,6 @@
 package io.emqtt.emqandroidtoolkit.ui.activity;
 
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -38,20 +29,19 @@ import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.event.MQTTActionEvent;
 import io.emqtt.emqandroidtoolkit.event.MessageEvent;
 import io.emqtt.emqandroidtoolkit.model.Connection;
-import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Publication;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
+import io.emqtt.emqandroidtoolkit.net.MQTTManager;
 import io.emqtt.emqandroidtoolkit.ui.adapter.ConnectionViewPagerAdapter;
-import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
+import io.emqtt.emqandroidtoolkit.ui.base.BaseActivity;
 import io.emqtt.emqandroidtoolkit.ui.fragment.PublicationListFragment;
 import io.emqtt.emqandroidtoolkit.ui.fragment.SubscriptionListFragment;
-import io.emqtt.emqandroidtoolkit.util.LogUtil;
 import io.emqtt.emqandroidtoolkit.util.RealmHelper;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
-public class DashboardActivity extends ToolBarActivity implements SubscriptionListFragment.OnListFragmentInteractionListener, MqttCallback {
+public class DashboardActivity extends BaseActivity implements SubscriptionListFragment.OnListFragmentInteractionListener {
 
     private static final int SUBSCRIPTION = 63;
 
@@ -67,7 +57,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
     private Subscription mSubscription;
     private Publication mPublication;
 
-    private MqttAsyncClient mClient;
+    private MQTTManager mMQTTManager;
     private ConnectionViewPagerAdapter mAdapter;
 
     private List<Subscription> mSubscriptionList;
@@ -89,7 +79,9 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
     @Override
     protected void setUpView() {
         mConnection = getIntent().getParcelableExtra(Constant.ExtraConstant.EXTRA_CONNECTION);
-        setTitle(mConnection.getServerURI());
+
+        mToolbar.setTitle(mConnection.getServerURI());
+        setSupportActionBar(mToolbar);
         setSubtitle(getString(R.string.connecting) );
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -335,31 +327,6 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
         RealmHelper.getInstance().addData(event.getMessage());
     }
 
-
-    @Override
-    public void connectionLost(Throwable cause) {
-        LogUtil.e("connectionLost");
-        EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECTION_LOST,null,cause));
-
-    }
-
-
-    @Override
-    public void messageArrived(final String topic, final MqttMessage message) throws Exception {
-        LogUtil.d("topic is " + topic + ",message is " + message.toString()+", qos is "+message.getQos());
-        EventBus.getDefault().postSticky(new MessageEvent(new EmqMessage(topic, message)));
-
-
-    }
-
-
-    @Override
-    public void deliveryComplete(IMqttDeliveryToken token) {
-        LogUtil.d("deliveryComplete");
-
-    }
-
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -403,122 +370,42 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
     }
 
 
-    private void initClient(){
-        MqttClientPersistence mqttClientPersistence = new MemoryPersistence();
-        try {
-            mClient = new MqttAsyncClient(mConnection.getServerURI(), mConnection.getClientId(), mqttClientPersistence);
-            mClient.setCallback(this);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+    private void initClient() {
+        mMQTTManager = MQTTManager.getInstance();
+        mMQTTManager.createClient(mConnection.getServerURI(), mConnection.getClientId());
 
     }
 
 
     private void connect() {
-        try {
-            setSubtitle(getString(R.string.connecting));
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setCleanSession(mConnection.isCleanSession());
-            mClient.connect(options, "Connect", new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECT_SUCCESS,asyncActionToken));
-
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECT_FAIL,asyncActionToken,exception));
-
-                }
-            });
-
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        setSubtitle(getString(R.string.connecting));
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setCleanSession(mConnection.isCleanSession());
+        mMQTTManager.connect(options);
     }
 
-    private void subscribe(Subscription subscription){
+    private void subscribe(Subscription subscription) {
         mSubscription = subscription;
-        try {
-            mClient.subscribe(subscription.getTopic(), subscription.getQoS(), "Subscribe", new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS,asyncActionToken));
-
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.SUBSCRIBE_FAIL,asyncActionToken,exception));
-
-
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        mMQTTManager.subscribe(subscription.getTopic(), subscription.getQoS());
     }
 
     private void unsubscribe(Subscription subscription){
-        try {
-            mClient.unsubscribe(subscription.getTopic(), "Unsubscribe", new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.UNSUBSCRIBE_SUCCESS,asyncActionToken));
-
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.UNSUBSCRIBE_FAIL,asyncActionToken,exception));
-
-
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        mMQTTManager.unsubscribe(subscription.getTopic());
     }
 
     private void publish(Publication publication){
-
-        try {
-            mClient.publish(publication.getTopic(), publication.getMessage(), "Publish", new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.PUBLISH_SUCCESS,asyncActionToken));
-
-
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.PUBLISH_FAIL,asyncActionToken,exception));
-
-
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        mMQTTManager.publish(publication.getTopic(),publication.getMessage());
     }
 
     private void disconnect(){
-        try {
-            mClient.disconnect();
-            setSubtitle(getString(R.string.disconnect));
-            invalidateOptionsMenu();
-        } catch (MqttException e) {
-            e.printStackTrace();
+        if (mMQTTManager.disconnect()){
+            finish();
         }
-
     }
 
 
     private boolean isConnected() {
-        return mClient != null && mClient.isConnected();
+        return mMQTTManager.isConnected();
     }
 
     public List<Subscription> getSubscriptionList() {

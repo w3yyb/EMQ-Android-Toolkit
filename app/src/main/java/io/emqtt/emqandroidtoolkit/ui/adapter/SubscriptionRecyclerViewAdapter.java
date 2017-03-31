@@ -47,15 +47,11 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
 
+        final int pos = holder.getAdapterPosition();
         final Subscription subscription = mSubscriptionList.get(position);
 
-        if (subscription.getDisplayName() == null) {
-            holder.displayNameText.setText(subscription.getTopic());
-        } else {
-            holder.displayNameText.setText(subscription.getDisplayName());
-        }
         holder.topicText.setText("Topic:" + subscription.getTopic());
         holder.QoSText.setText("QoSText:" + subscription.getQoS());
         if (null != subscription.getMessage()) {
@@ -66,7 +62,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         holder.moreImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMenu(v, position, subscription);
+                showMenu(v, pos, subscription);
 
             }
         });
@@ -75,7 +71,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    mListener.onItemClick(position,subscription);
+                    mListener.onItemClick(pos,subscription);
                 }
             }
         });
@@ -155,7 +151,6 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.display_name) TextView displayNameText;
         @BindView(R.id.topic) TextView topicText;
         @BindView(R.id.QoS) TextView QoSText;
         @BindView(R.id.payload) TextView payloadText;
