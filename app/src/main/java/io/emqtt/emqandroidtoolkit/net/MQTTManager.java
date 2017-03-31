@@ -12,6 +12,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.HashMap;
+
 import io.emqtt.emqandroidtoolkit.Constant;
 import io.emqtt.emqandroidtoolkit.event.MQTTActionEvent;
 import io.emqtt.emqandroidtoolkit.event.MessageEvent;
@@ -28,7 +30,8 @@ public class MQTTManager {
 
     private static MQTTManager INSTANCE;
 
-    private MqttAsyncClient mClient;
+
+    private HashMap<String, MqttAsyncClient> mHashMap;
 
 
     public static MQTTManager getInstance() {
@@ -40,31 +43,58 @@ public class MQTTManager {
     }
 
     private MQTTManager() {
+        mHashMap = new HashMap<>();
 
     }
 
     public static void release() {
         if (INSTANCE != null) {
-            INSTANCE.disconnect();
+            INSTANCE.disconnectAllClient();
             INSTANCE = null;
         }
     }
 
 
-    public void createClient(String serverURI, String clientId) {
+    public MqttAsyncClient createClient(String tag, String serverURI, String clientId) {
         MqttClientPersistence mqttClientPersistence = new MemoryPersistence();
+        MqttAsyncClient client = null;
         try {
-            mClient = new MqttAsyncClient(serverURI, clientId, mqttClientPersistence);
-            mClient.setCallback(mCallback);
+            client = new MqttAsyncClient(serverURI, clientId, mqttClientPersistence);
+            client.setCallback(new MqttCallback() {
+                @Override
+                public void connectionLost(Throwable cause) {
+                    LogUtil.e("connectionLost");
+                    EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECTION_LOST, null, cause));
+
+                }
+
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    LogUtil.d("topic is " + topic + ",message is " + message.toString() + ", qos is " + message.getQos());
+                    EventBus.getDefault().postSticky(new MessageEvent(new EmqMessage(topic, message)));
+
+                }
+
+                @Override
+                public void deliveryComplete(IMqttDeliveryToken token) {
+                    LogUtil.d("deliveryComplete");
+
+
+                }
+            });
+
+            mHashMap.put(tag, client);
+
         } catch (MqttException e) {
             e.printStackTrace();
         }
+        return client;
 
     }
 
-    public void connect(MqttConnectOptions options) {
+    public void connect(MqttAsyncClient client, MqttConnectOptions options) {
         try {
-            mClient.connect(options, "Connect", new IMqttActionListener() {
+            client.connect(options, "Connect", new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECT_SUCCESS, asyncActionToken));
@@ -83,10 +113,10 @@ public class MQTTManager {
         }
     }
 
-    public void subscribe(String topic, int qos) {
-        if (isConnected()) {
+    public void subscribe(MqttAsyncClient client, String topic, int qos) {
+        if (isConnected(client)) {
             try {
-                mClient.subscribe(topic, qos, "Subscribe", new IMqttActionListener() {
+                client.subscribe(topic, qos, "Subscribe", new IMqttActionListener() {
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken) {
                         EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS, asyncActionToken));
@@ -107,10 +137,10 @@ public class MQTTManager {
 
     }
 
-    public void unsubscribe(String topic) {
-        if (isConnected()) {
+    public void unsubscribe(MqttAsyncClient client, String topic) {
+        if (isConnected(client)) {
             try {
-                mClient.unsubscribe(topic, "Unsubscribe", new IMqttActionListener() {
+                client.unsubscribe(topic, "Unsubscribe", new IMqttActionListener() {
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken) {
                         EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.UNSUBSCRIBE_SUCCESS, asyncActionToken));
@@ -130,10 +160,10 @@ public class MQTTManager {
 
     }
 
-    public void publish(String topic, MqttMessage mqttMessage) {
-        if (isConnected()) {
+    public void publish(MqttAsyncClient client, String topic, MqttMessage mqttMessage) {
+        if (isConnected(client)) {
             try {
-                mClient.publish(topic, mqttMessage, "Publish", new IMqttActionListener() {
+                client.publish(topic, mqttMessage, "Publish", new IMqttActionListener() {
                     @Override
                     public void onSuccess(IMqttToken asyncActionToken) {
                         EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.PUBLISH_SUCCESS, asyncActionToken));
@@ -154,13 +184,13 @@ public class MQTTManager {
 
     }
 
-    public boolean disconnect() {
-        if (!isConnected()) {
+    public boolean disconnect(MqttAsyncClient client) {
+        if (!isConnected(client)) {
             return true;
         }
 
         try {
-            mClient.disconnect();
+            client.disconnect();
             return true;
         } catch (MqttException e) {
             e.printStackTrace();
@@ -168,32 +198,18 @@ public class MQTTManager {
         }
     }
 
-
-    public boolean isConnected() {
-        return mClient != null && mClient.isConnected();
+    private void disconnectAllClient() {
+        for (MqttAsyncClient client : mHashMap.values()) {
+            disconnect(client);
+        }
     }
 
-    private MqttCallback mCallback = new MqttCallback() {
-        @Override
-        public void connectionLost(Throwable cause) {
-            LogUtil.e("connectionLost");
-            EventBus.getDefault().post(new MQTTActionEvent(Constant.MQTTStatusConstant.CONNECTION_LOST, null, cause));
 
-        }
+    public boolean isConnected(MqttAsyncClient client) {
+        return client != null && client.isConnected();
+    }
 
-        @Override
-        public void messageArrived(String topic, MqttMessage message) throws Exception {
-            LogUtil.d("topic is " + topic + ",message is " + message.toString() + ", qos is " + message.getQos());
-            EventBus.getDefault().postSticky(new MessageEvent(new EmqMessage(topic, message)));
-
-        }
-
-        @Override
-        public void deliveryComplete(IMqttDeliveryToken token) {
-            LogUtil.d("deliveryComplete");
-
-
-        }
-    };
-
+    public MqttAsyncClient getClient(String tag) {
+        return mHashMap.get(tag);
+    }
 }

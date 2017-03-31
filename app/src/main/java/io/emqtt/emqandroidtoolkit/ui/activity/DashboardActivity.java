@@ -1,5 +1,6 @@
 package io.emqtt.emqandroidtoolkit.ui.activity;
 
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -58,6 +59,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     private Publication mPublication;
 
     private MQTTManager mMQTTManager;
+    private MqttAsyncClient mClient;
     private ConnectionViewPagerAdapter mAdapter;
 
     private List<Subscription> mSubscriptionList;
@@ -66,7 +68,6 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     public static void openActivity(Context context, Connection connection) {
         Intent intent = new Intent(context, DashboardActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra(Constant.ExtraConstant.EXTRA_CONNECTION, connection);
         context.startActivity(intent);
     }
@@ -106,55 +107,15 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
         EventBus.getDefault().register(this);
 
-        mSubscriptionList = new ArrayList<>();
+        getSubscription();
 
-        Realm realm = RealmHelper.getInstance().getRealm();
-        realm.beginTransaction();
-        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClientId()).findAll();
-        realm.commitTransaction();
-        if (list != null) {
-            mSubscriptionList.addAll(list);
-        }
-
-
-        SubscriptionListFragment subscriptionListFragment = SubscriptionListFragment.newInstance();
-        PublicationListFragment publicationListFragment = PublicationListFragment.newInstance();
-
-        mAdapter = new ConnectionViewPagerAdapter(getSupportFragmentManager());
-        mAdapter.addFragment(subscriptionListFragment, SubscriptionListFragment.TAG);
-        mAdapter.addFragment(publicationListFragment, PublicationListFragment.TAG);
-
-        mViewpager.setAdapter(mAdapter);
-        mTabLayout.setupWithViewPager(mViewpager);
-
-        mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                if (mAdapter.getItem(position) instanceof SubscriptionListFragment) {
-                    mCurrentMode = SUBSCRIPTION;
-                } else if (mAdapter.getItem(position) instanceof PublicationListFragment) {
-                    mCurrentMode = PUBLICATION;
-                }
-
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
+        setUpTabLayout();
 
         initClient();
 
-        connect();
-
     }
+
+
 
 
     @Override
@@ -333,6 +294,8 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
+
+
     }
 
 
@@ -355,12 +318,6 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     }
 
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(DashboardActivity.this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivity(intent);
-    }
 
 
     private void setSubtitle(String subtitle) {
@@ -370,9 +327,65 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     }
 
 
+    private void getSubscription() {
+        mSubscriptionList = new ArrayList<>();
+
+        Realm realm = RealmHelper.getInstance().getRealm();
+        realm.beginTransaction();
+        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClientId()).findAll();
+        realm.commitTransaction();
+        if (list != null) {
+            mSubscriptionList.addAll(list);
+        }
+    }
+
+
+    private void setUpTabLayout() {
+        SubscriptionListFragment subscriptionListFragment = SubscriptionListFragment.newInstance();
+        PublicationListFragment publicationListFragment = PublicationListFragment.newInstance();
+
+        mAdapter = new ConnectionViewPagerAdapter(getSupportFragmentManager());
+        mAdapter.addFragment(subscriptionListFragment, SubscriptionListFragment.TAG);
+        mAdapter.addFragment(publicationListFragment, PublicationListFragment.TAG);
+
+        mViewpager.setAdapter(mAdapter);
+        mTabLayout.setupWithViewPager(mViewpager);
+
+        mViewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if (mAdapter.getItem(position) instanceof SubscriptionListFragment) {
+                    mCurrentMode = SUBSCRIPTION;
+                } else if (mAdapter.getItem(position) instanceof PublicationListFragment) {
+                    mCurrentMode = PUBLICATION;
+                }
+
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+    }
+
     private void initClient() {
         mMQTTManager = MQTTManager.getInstance();
-        mMQTTManager.createClient(mConnection.getServerURI(), mConnection.getClientId());
+        mClient = mMQTTManager.getClient(mConnection.toString());
+        if (mClient == null) {
+            mClient = mMQTTManager.createClient(mConnection.toString(), mConnection.getServerURI(), mConnection.getClientId());
+        }
+        if (mMQTTManager.isConnected(mClient)) {
+            setSubtitle(getString(R.string.connected));
+        } else {
+            connect();
+        }
 
     }
 
@@ -381,34 +394,36 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         setSubtitle(getString(R.string.connecting));
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(mConnection.isCleanSession());
-        mMQTTManager.connect(options);
+        mMQTTManager.connect(mClient,options);
     }
 
     private void subscribe(Subscription subscription) {
         mSubscription = subscription;
-        mMQTTManager.subscribe(subscription.getTopic(), subscription.getQoS());
+        mMQTTManager.subscribe(mClient,subscription.getTopic(), subscription.getQoS());
     }
 
     private void unsubscribe(Subscription subscription){
-        mMQTTManager.unsubscribe(subscription.getTopic());
+        mMQTTManager.unsubscribe(mClient,subscription.getTopic());
     }
 
     private void publish(Publication publication){
-        mMQTTManager.publish(publication.getTopic(),publication.getMessage());
+        mMQTTManager.publish(mClient,publication.getTopic(),publication.getMessage());
     }
 
     private void disconnect(){
-        if (mMQTTManager.disconnect()){
+        if (mMQTTManager.disconnect(mClient)){
             finish();
         }
     }
 
 
     private boolean isConnected() {
-        return mMQTTManager.isConnected();
+        return mMQTTManager.isConnected(mClient);
     }
 
     public List<Subscription> getSubscriptionList() {
         return mSubscriptionList;
     }
+
+
 }

@@ -85,9 +85,13 @@ public class Connection extends RealmObject implements Parcelable {
     }
 
     public String getServerURI() {
-        return "tcp://"+host + ":" + port;
+        return "tcp://" + host + ":" + port;
     }
 
+    @Override
+    public String toString() {
+        return getServerURI() + clientId;
+    }
 
     @Override
     public int describeContents() {

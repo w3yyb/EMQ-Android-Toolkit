@@ -1,5 +1,7 @@
 package io.emqtt.emqandroidtoolkit.ui.activity;
 
+import org.eclipse.paho.client.mqttv3.MqttTopic;
+
 import android.content.Intent;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,8 +44,11 @@ public class PublicationActivity extends ToolBarActivity {
     @OnClick(R.id.btn_publish)
     public void onViewClicked() {
         String topic = mTopic.getText().toString().trim();
-        if (topic.isEmpty()) {
-            TipUtil.showSnackbar(mLinearLayout, "Invalid topic length");
+
+        try{
+            MqttTopic.validate(topic, false/*wildcards NOT allowed*/);
+        }catch (IllegalArgumentException e){
+            TipUtil.showSnackbar(mLinearLayout, e.getMessage());
             return;
         }
         int qos = mQoSChooseLayout.getQoS();

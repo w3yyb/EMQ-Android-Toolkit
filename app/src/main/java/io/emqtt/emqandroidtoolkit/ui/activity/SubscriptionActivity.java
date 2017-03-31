@@ -1,5 +1,7 @@
 package io.emqtt.emqandroidtoolkit.ui.activity;
 
+import org.eclipse.paho.client.mqttv3.MqttTopic;
+
 import android.content.Intent;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,10 +47,13 @@ public class SubscriptionActivity extends ToolBarActivity {
     @OnClick(R.id.btn_subscribe)
     public void onViewClicked() {
         String topic = mTopic.getText().toString().trim();
-        if (topic.isEmpty()){
-            TipUtil.showSnackbar(mLinearLayout,"Invalid topic length");
+        try {
+            MqttTopic.validate(topic, true/*allow wildcards*/);
+        } catch (IllegalArgumentException e) {
+            TipUtil.showSnackbar(mLinearLayout, e.getMessage());
             return;
         }
+
         int qos = mQoSLayout.getQoS();
 
         Subscription subscription = new Subscription(topic, qos);
@@ -59,8 +64,6 @@ public class SubscriptionActivity extends ToolBarActivity {
         finish();
 
     }
-
-
 
 
 }
