@@ -22,7 +22,6 @@ public class Subscription extends RealmObject implements Parcelable {
     @QoSConstant.QoS
     int QoS;
 
-    private String displayName;
 
     @Ignore
     private EmqMessage message;
@@ -59,13 +58,6 @@ public class Subscription extends RealmObject implements Parcelable {
         QoS = qoS;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
 
     public EmqMessage getMessage() {
         return message;
@@ -86,14 +78,12 @@ public class Subscription extends RealmObject implements Parcelable {
         dest.writeString(this.clientId);
         dest.writeString(this.topic);
         dest.writeInt(this.QoS);
-        dest.writeString(this.displayName);
     }
 
     protected Subscription(Parcel in) {
         this.clientId = in.readString();
         this.topic = in.readString();
         this.QoS = in.readInt();
-        this.displayName = in.readString();
     }
 
     public static final Creator<Subscription> CREATOR = new Creator<Subscription>() {

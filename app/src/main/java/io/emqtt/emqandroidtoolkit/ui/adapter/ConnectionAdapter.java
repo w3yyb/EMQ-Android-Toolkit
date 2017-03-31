@@ -51,7 +51,7 @@ public class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.Co
     public void onBindViewHolder(final ConnectionViewHolder holder, int position) {
         final Connection connection = mConnectionList.get(position);
         final int pos = holder.getAdapterPosition();
-        holder.clientIdText.setText(connection.getClintId());
+        holder.clientIdText.setText(connection.getClientId());
         holder.serverText.setText(connection.getHost() + ":" + connection.getPort());
 
         holder.more.setOnClickListener(new View.OnClickListener() {

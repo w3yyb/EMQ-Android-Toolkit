@@ -20,7 +20,6 @@ public class SubscriptionActivity extends ToolBarActivity {
 
 
     @BindView(R.id.topic) EditText mTopic;
-    @BindView(R.id.display_name) EditText mDisplayName;
     @BindView(R.id.btn_subscribe) Button mSubscribeBtn;
     @BindView(R.id.linear_layout) LinearLayout mLinearLayout;
     @BindView(qos) QoSChooseLayout mQoSLayout;
@@ -53,11 +52,6 @@ public class SubscriptionActivity extends ToolBarActivity {
         int qos = mQoSLayout.getQoS();
 
         Subscription subscription = new Subscription(topic, qos);
-        String displayName = mDisplayName.getText().toString().trim();
-        if (displayName.isEmpty()) {
-            displayName = topic;
-        }
-        subscription.setDisplayName(displayName);
 
         Intent intent = new Intent();
         intent.putExtra(Constant.ExtraConstant.EXTRA_SUBSCRIPTION, subscription);

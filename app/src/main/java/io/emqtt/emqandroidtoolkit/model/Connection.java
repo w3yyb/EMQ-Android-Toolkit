@@ -17,7 +17,7 @@ public class Connection extends RealmObject implements Parcelable {
 
     private String port;
 
-    private String clintId;
+    private String clientId;
 
     private boolean cleanSession;
 
@@ -29,10 +29,10 @@ public class Connection extends RealmObject implements Parcelable {
     public Connection() {
     }
 
-    public Connection(String host, String port, String clintId, boolean cleanSession) {
+    public Connection(String host, String port, String clientId, boolean cleanSession) {
         this.host = host;
         this.port = port;
-        this.clintId = clintId;
+        this.clientId = clientId;
         this.cleanSession = cleanSession;
     }
 
@@ -52,12 +52,12 @@ public class Connection extends RealmObject implements Parcelable {
         this.port = port;
     }
 
-    public String getClintId() {
-        return clintId;
+    public String getClientId() {
+        return clientId;
     }
 
-    public void setClintId(String clintId) {
-        this.clintId = clintId;
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public boolean isCleanSession() {
@@ -98,7 +98,7 @@ public class Connection extends RealmObject implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.host);
         dest.writeString(this.port);
-        dest.writeString(this.clintId);
+        dest.writeString(this.clientId);
         dest.writeByte(this.cleanSession ? (byte) 1 : (byte) 0);
         dest.writeString(this.username);
         dest.writeString(this.password);
@@ -107,7 +107,7 @@ public class Connection extends RealmObject implements Parcelable {
     protected Connection(Parcel in) {
         this.host = in.readString();
         this.port = in.readString();
-        this.clintId = in.readString();
+        this.clientId = in.readString();
         this.cleanSession = in.readByte() != 0;
         this.username = in.readString();
         this.password = in.readString();

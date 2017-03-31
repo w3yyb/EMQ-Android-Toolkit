@@ -104,7 +104,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_connection_status, null);
         ((TextView)view.findViewById(R.id.server)).setText(mConnection.getServerURI());
-        ((TextView)view.findViewById(R.id.client_id)).setText(mConnection.getClintId());
+        ((TextView)view.findViewById(R.id.client_id)).setText(mConnection.getClientId());
         dialog.setContentView(view);
         dialog.show();
     }
@@ -118,7 +118,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
         Realm realm = RealmHelper.getInstance().getRealm();
         realm.beginTransaction();
-        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClintId()).findAll();
+        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClientId()).findAll();
         realm.commitTransaction();
         if (list != null) {
             mSubscriptionList.addAll(list);
@@ -197,7 +197,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
         if (resultCode == RESULT_OK) {
             if (requestCode == SUBSCRIPTION) {
                 Subscription subscription = data.getParcelableExtra(Constant.ExtraConstant.EXTRA_SUBSCRIPTION);
-                subscription.setClientId(mConnection.getClintId());
+                subscription.setClientId(mConnection.getClientId());
                 RealmHelper.getInstance().addData(subscription);
                 mSubscription = subscription;
                 subscribe(subscription);
@@ -261,8 +261,8 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
         if (mCurrentMode == SUBSCRIPTION) {
             startActivityForResult(SubscriptionActivity.class, SUBSCRIPTION);
-//            SubscriptionFragment subscriptionFragment=new SubscriptionFragment();
-//            subscriptionFragment.show(getFragmentManager(),"SubscriptionFragment");
+//            SubscriptionFragment subscriptionFragment = new SubscriptionFragment();
+//            subscriptionFragment.show(getFragmentManager(), "SubscriptionFragment");
         }else if (mCurrentMode == PUBLICATION){
             startActivityForResult(PublicationActivity.class, PUBLICATION);
         }
@@ -330,7 +330,6 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(MessageEvent event){
-        LogUtil.d("onMessageEvent");
         SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
         subscriptionListFragment.updateData(event.getMessage());
         RealmHelper.getInstance().addData(event.getMessage());
@@ -407,7 +406,7 @@ public class DashboardActivity extends ToolBarActivity implements SubscriptionLi
     private void initClient(){
         MqttClientPersistence mqttClientPersistence = new MemoryPersistence();
         try {
-            mClient = new MqttAsyncClient(mConnection.getServerURI(), mConnection.getClintId(), mqttClientPersistence);
+            mClient = new MqttAsyncClient(mConnection.getServerURI(), mConnection.getClientId(), mqttClientPersistence);
             mClient.setCallback(this);
         } catch (MqttException e) {
             e.printStackTrace();

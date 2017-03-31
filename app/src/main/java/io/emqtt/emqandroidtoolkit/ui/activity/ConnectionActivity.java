@@ -16,6 +16,7 @@ import io.emqtt.emqandroidtoolkit.model.Connection;
 import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
 import io.emqtt.emqandroidtoolkit.util.RealmHelper;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
+import io.realm.Realm;
 
 
 public class ConnectionActivity extends ToolBarActivity {
@@ -37,6 +38,7 @@ public class ConnectionActivity extends ToolBarActivity {
     @BindView(R.id.operate_connection) Button mOperateConnectionButton;
 
     private int mMode;
+    private Connection mConnection;
 
     @IntDef({MODE_ADD, MODE_EDIT})
     public @interface mode {
@@ -80,8 +82,8 @@ public class ConnectionActivity extends ToolBarActivity {
             mOperateConnectionButton.setText(R.string.add_connection);
         } else {
             mOperateConnectionButton.setText(R.string.save_connection);
-            Connection connection = getIntent().getParcelableExtra(EXTRA_CONNECTION);
-            setConnection(connection);
+            mConnection = getIntent().getParcelableExtra(EXTRA_CONNECTION);
+            setConnection(mConnection);
 
         }
 
@@ -112,11 +114,26 @@ public class ConnectionActivity extends ToolBarActivity {
             return;
         }
 
-        Connection connection = getConnection();
+
+        if (!isAddMode()) {
+            Realm realm = RealmHelper.getInstance().getRealm();
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    Connection connection = realm.where(Connection.class).equalTo("clientId", mConnection.getClientId()).findFirst();
+                    mConnection = updateConnection(connection);
+
+                }
+            });
+        } else {
+            mConnection = new Connection();
+            updateConnection(mConnection);
+            RealmHelper.getInstance().addData(mConnection);
+        }
+
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_CONNECTION, connection);
+        intent.putExtra(EXTRA_CONNECTION, mConnection);
         setResult(RESULT_OK, intent);
-        RealmHelper.getInstance().addData(connection);
         finish();
 
     }
@@ -124,20 +141,24 @@ public class ConnectionActivity extends ToolBarActivity {
     private void setConnection(Connection connection) {
         mHost.setText(connection.getHost());
         mPort.setText(connection.getPort());
-        mClientId.setText(connection.getClintId());
+        mClientId.setText(connection.getClientId());
         mCleanSession.setChecked(connection.isCleanSession());
         mUsername.setText(connection.getUsername());
         mPassword.setText(connection.getPassword());
     }
 
-    private Connection getConnection() {
+    private Connection updateConnection(Connection connection) {
         String host = mHost.getText().toString().trim();
         String port = mPort.getText().toString().trim();
         String clientId = mClientId.getText().toString().trim();
         boolean cleanSession = mCleanSession.isChecked();
         String username = mUsername.getText().toString().trim();
         String password = mPassword.getText().toString().trim();
-        Connection connection = new Connection(host, port, clientId, cleanSession);
+
+        connection.setHost(host);
+        connection.setPort(port);
+        connection.setClientId(clientId);
+        connection.setCleanSession(cleanSession);
         connection.setUsername(username);
         connection.setPassword(password);
         return connection;

@@ -22,16 +22,17 @@ public class SubscriptionFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.activity_subscription, null);
+        View view = inflater.inflate(R.layout.dialog_suscription, null);
         builder.setView(view)
-                .setPositiveButton("Sign in",
-                        new DialogInterface.OnClickListener()
-                        {
+                .setPositiveButton(getString(R.string.subscribe),
+                        new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int id)
-                            {
+                            public void onClick(DialogInterface dialog, int id) {
                             }
                         }).setNegativeButton("Cancel", null);
         return builder.create();
     }
+
+
+
 }
