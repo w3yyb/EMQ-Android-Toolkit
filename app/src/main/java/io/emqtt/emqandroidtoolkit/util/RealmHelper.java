@@ -1,5 +1,6 @@
 package io.emqtt.emqandroidtoolkit.util;
 
+import io.emqtt.emqandroidtoolkit.model.Subscription;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmObject;
@@ -41,6 +42,25 @@ public class RealmHelper {
         mRealm.beginTransaction();
         mRealm.copyToRealm(data);
         mRealm.commitTransaction();
+    }
+
+    public void addSubscription(final Subscription data) {
+        String topic = data.getTopic();
+        final Subscription subscription = mRealm.where(data.getClass()).equalTo("topic", topic).findFirst();
+        if (subscription != null) {
+            mRealm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    subscription.setQoS(data.getQoS());
+                }
+            });
+
+        } else {
+            mRealm.beginTransaction();
+            mRealm.copyToRealm(data);
+            mRealm.commitTransaction();
+        }
+
     }
 
     public <T extends RealmObject> T queryFirst(Class<T> clazz) {

@@ -95,7 +95,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
                         }
                         removeData(position);
 //                        if (mListener != null) {
-//                            mListener.onItemUnsubcribe(position,subscription);
+//                            mListener.onItemUnsubscribe(position,subscription);
 //                        }
 
                         return true;
@@ -108,7 +108,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
 
                     case R.id.action_unsubscribe:
                         if (mListener != null) {
-                            mListener.onItemUnsubcribe(position,subscription);
+                            mListener.onItemUnsubscribe(position,subscription);
                         }
 
                         return true;

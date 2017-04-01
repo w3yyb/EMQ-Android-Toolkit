@@ -115,6 +115,6 @@ public class SubscriptionListFragment extends BaseFragment {
 
         void onItemSubscribe(int position,Subscription item);
 
-        void onItemUnsubcribe(int position,Subscription item);
+        void onItemUnsubscribe(int position, Subscription item);
     }
 }

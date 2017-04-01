@@ -62,6 +62,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     private MqttAsyncClient mClient;
     private ConnectionViewPagerAdapter mAdapter;
 
+    private RealmResults<Subscription> mSubscriptionResults;
     private List<Subscription> mSubscriptionList;
 
     private int mCurrentMode = SUBSCRIPTION;
@@ -126,7 +127,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     @Override
     public void onItemDelete(int position, Subscription item) {
-        RealmHelper.getInstance().delete(item);
+        RealmHelper.getInstance().delete(mSubscriptionResults.get(position));
 
     }
 
@@ -136,7 +137,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     }
 
     @Override
-    public void onItemUnsubcribe(int position, Subscription item) {
+    public void onItemUnsubscribe(int position, Subscription item) {
         unsubscribe(item);
 
     }
@@ -151,8 +152,8 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
             if (requestCode == SUBSCRIPTION) {
                 Subscription subscription = data.getParcelableExtra(Constant.ExtraConstant.EXTRA_SUBSCRIPTION);
                 subscription.setClientId(mConnection.getClientId());
-                RealmHelper.getInstance().addData(subscription);
                 mSubscription = subscription;
+                RealmHelper.getInstance().addSubscription(mSubscription);
                 subscribe(subscription);
 
             }
@@ -329,14 +330,14 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     private void getSubscription() {
         mSubscriptionList = new ArrayList<>();
-
         Realm realm = RealmHelper.getInstance().getRealm();
         realm.beginTransaction();
-        RealmResults<Subscription> list = realm.where(Subscription.class).equalTo("clientId", mConnection.getClientId()).findAll();
+        mSubscriptionResults = realm.where(Subscription.class).equalTo("clientId", mConnection.getClientId()).findAll();
         realm.commitTransaction();
-        if (list != null) {
-            mSubscriptionList.addAll(list);
-        }
+
+        mSubscriptionList.addAll(mSubscriptionResults);
+
+
     }
 
 
