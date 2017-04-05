@@ -31,9 +31,9 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
 
     public SubscriptionRecyclerViewAdapter(List<Subscription> items, OnListFragmentInteractionListener listener) {
         mSubscriptionList = items;
-        mArrayMap=new ArrayMap<>();
+        mArrayMap = new ArrayMap<>();
         for (Subscription subscription : mSubscriptionList) {
-            mArrayMap.put(subscription.getTopic(),mSubscriptionList.indexOf(subscription));
+            mArrayMap.put(subscription.getTopic(), mSubscriptionList.indexOf(subscription));
         }
         mListener = listener;
     }
@@ -94,9 +94,6 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
                             mListener.onItemDelete(position, subscription);
                         }
                         removeData(position);
-//                        if (mListener != null) {
-//                            mListener.onItemUnsubscribe(position,subscription);
-//                        }
 
                         return true;
 

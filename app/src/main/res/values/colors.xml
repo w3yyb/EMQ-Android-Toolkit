@@ -9,4 +9,7 @@
 
     <color name="md_green_500">#4caf50</color>
     <color name="md_grey_500">#9E9E9E</color>
+    <color name="md_red_500">#F44336</color>
+
+    <color name="black">#000000</color>
 </resources>

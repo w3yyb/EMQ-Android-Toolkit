@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -52,7 +52,6 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.tab_layout) TabLayout mTabLayout;
     @BindView(R.id.viewpager) ViewPager mViewpager;
-    @BindView(R.id.fab) FloatingActionButton mFab;
 
     private Connection mConnection;
     private Subscription mSubscription;
@@ -128,7 +127,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     @Override
     public void onItemDelete(int position, Subscription item) {
         RealmHelper.getInstance().delete(mSubscriptionResults.get(position));
-
+        unsubscribe(item);
     }
 
     @Override
@@ -286,6 +285,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     public void onEvent(MessageEvent event){
         SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
         subscriptionListFragment.updateData(event.getMessage());
+        updateView(true);
         RealmHelper.getInstance().addData(event.getMessage());
     }
 
@@ -315,6 +315,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     @Override
     public void onStop() {
         super.onStop();
+        EventBus.getDefault().removeAllStickyEvents();
         EventBus.getDefault().unregister(this);
     }
 
@@ -362,6 +363,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
             public void onPageSelected(int position) {
                 if (mAdapter.getItem(position) instanceof SubscriptionListFragment) {
                     mCurrentMode = SUBSCRIPTION;
+                    updateView(false);
                 } else if (mAdapter.getItem(position) instanceof PublicationListFragment) {
                     mCurrentMode = PUBLICATION;
                 }
@@ -374,6 +376,32 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
             }
         });
+
+        TabLayout.Tab tab = mTabLayout.getTabAt(0);
+        if (tab != null) {
+            tab.setCustomView(getView());
+        }
+
+
+    }
+
+    private View getView() {
+        View view = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        TextView textView = (TextView) view.findViewById(R.id.title);
+        textView.setText(SubscriptionListFragment.TAG);
+        return view;
+    }
+
+    private void updateView(boolean isShow) {
+        View view = mTabLayout.getTabAt(0).getCustomView();
+        ImageView imageView = (ImageView) view.findViewById(R.id.status);
+        if (mCurrentMode != SUBSCRIPTION && isShow) {
+            imageView.setVisibility(View.VISIBLE);
+        }else if (!isShow){
+            imageView.setVisibility(View.INVISIBLE);
+        }
+
+
     }
 
     private void initClient() {
