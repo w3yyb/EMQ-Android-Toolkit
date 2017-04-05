@@ -14,7 +14,7 @@ import io.realm.annotations.Ignore;
 
 public class Subscription extends RealmObject implements Parcelable {
 
-    private String clientId;
+    private String connectionId;
 
     private String topic;
 
@@ -34,12 +34,12 @@ public class Subscription extends RealmObject implements Parcelable {
         QoS = qos;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getConnectionId() {
+        return connectionId;
     }
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
+    public void setConnectionId(String connectionId) {
+        this.connectionId = connectionId;
     }
 
     public String getTopic() {
@@ -75,13 +75,13 @@ public class Subscription extends RealmObject implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.clientId);
+        dest.writeString(this.connectionId);
         dest.writeString(this.topic);
         dest.writeInt(this.QoS);
     }
 
     protected Subscription(Parcel in) {
-        this.clientId = in.readString();
+        this.connectionId = in.readString();
         this.topic = in.readString();
         this.QoS = in.readInt();
     }

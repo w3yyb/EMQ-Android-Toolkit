@@ -19,7 +19,6 @@
 
     <!--subscribe and publish-->
     <string name="topic">Topic</string>
-    <string name="display_name">Display name</string>
     <string name="QoS">QoS</string>
     <string name="subscribe">Subscribe</string>
     <string name="publish">Publish</string>

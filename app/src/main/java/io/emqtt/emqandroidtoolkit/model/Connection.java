@@ -25,6 +25,8 @@ public class Connection extends RealmObject implements Parcelable {
 
     private String password;
 
+    private String id;
+
 
     public Connection() {
     }
@@ -84,14 +86,18 @@ public class Connection extends RealmObject implements Parcelable {
         this.password = password;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void generateId() {
+        this.id = getServerURI() + clientId;
+    }
+
     public String getServerURI() {
         return "tcp://" + host + ":" + port;
     }
 
-    @Override
-    public String toString() {
-        return getServerURI() + clientId;
-    }
 
     @Override
     public int describeContents() {
@@ -106,6 +112,7 @@ public class Connection extends RealmObject implements Parcelable {
         dest.writeByte(this.cleanSession ? (byte) 1 : (byte) 0);
         dest.writeString(this.username);
         dest.writeString(this.password);
+        dest.writeString(this.id);
     }
 
     protected Connection(Parcel in) {
@@ -115,6 +122,7 @@ public class Connection extends RealmObject implements Parcelable {
         this.cleanSession = in.readByte() != 0;
         this.username = in.readString();
         this.password = in.readString();
+        this.id = in.readString();
     }
 
     public static final Parcelable.Creator<Connection> CREATOR = new Parcelable.Creator<Connection>() {

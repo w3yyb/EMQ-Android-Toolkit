@@ -55,7 +55,7 @@ public class MQTTManager {
     }
 
 
-    public MqttAsyncClient createClient(String tag, String serverURI, String clientId) {
+    public MqttAsyncClient createClient(String id, String serverURI, String clientId) {
         MqttClientPersistence mqttClientPersistence = new MemoryPersistence();
         MqttAsyncClient client = null;
         try {
@@ -83,7 +83,7 @@ public class MQTTManager {
                 }
             });
 
-            mHashMap.put(tag, client);
+            mHashMap.put(id, client);
 
         } catch (MqttException e) {
             e.printStackTrace();
@@ -209,7 +209,7 @@ public class MQTTManager {
         return client != null && client.isConnected();
     }
 
-    public MqttAsyncClient getClient(String tag) {
-        return mHashMap.get(tag);
+    public MqttAsyncClient getClient(String id) {
+        return mHashMap.get(id);
     }
 }

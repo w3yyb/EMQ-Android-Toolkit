@@ -150,7 +150,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         if (resultCode == RESULT_OK) {
             if (requestCode == SUBSCRIPTION) {
                 Subscription subscription = data.getParcelableExtra(Constant.ExtraConstant.EXTRA_SUBSCRIPTION);
-                subscription.setClientId(mConnection.getClientId());
+                subscription.setConnectionId(mConnection.getId());
                 mSubscription = subscription;
                 RealmHelper.getInstance().addSubscription(mSubscription);
                 subscribe(subscription);
@@ -333,7 +333,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         mSubscriptionList = new ArrayList<>();
         Realm realm = RealmHelper.getInstance().getRealm();
         realm.beginTransaction();
-        mSubscriptionResults = realm.where(Subscription.class).equalTo("clientId", mConnection.getClientId()).findAll();
+        mSubscriptionResults = realm.where(Subscription.class).equalTo("connectionId", mConnection.getId()).findAll();
         realm.commitTransaction();
 
         mSubscriptionList.addAll(mSubscriptionResults);
@@ -408,7 +408,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         mMQTTManager = MQTTManager.getInstance();
         mClient = mMQTTManager.getClient(mConnection.toString());
         if (mClient == null) {
-            mClient = mMQTTManager.createClient(mConnection.toString(), mConnection.getServerURI(), mConnection.getClientId());
+            mClient = mMQTTManager.createClient(mConnection.getId(), mConnection.getServerURI(), mConnection.getClientId());
         }
         if (mMQTTManager.isConnected(mClient)) {
             setSubtitle(getString(R.string.connected));

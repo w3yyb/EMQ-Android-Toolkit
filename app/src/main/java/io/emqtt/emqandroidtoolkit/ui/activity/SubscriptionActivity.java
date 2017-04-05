@@ -16,15 +16,13 @@ import io.emqtt.emqandroidtoolkit.ui.base.ToolBarActivity;
 import io.emqtt.emqandroidtoolkit.ui.widget.QoSChooseLayout;
 import io.emqtt.emqandroidtoolkit.util.TipUtil;
 
-import static io.emqtt.emqandroidtoolkit.R.id.qos;
-
 public class SubscriptionActivity extends ToolBarActivity {
 
 
     @BindView(R.id.topic) EditText mTopic;
     @BindView(R.id.btn_subscribe) Button mSubscribeBtn;
     @BindView(R.id.linear_layout) LinearLayout mLinearLayout;
-    @BindView(qos) QoSChooseLayout mQoSLayout;
+    @BindView(R.id.qos) QoSChooseLayout mQoSLayout;
 
 
 

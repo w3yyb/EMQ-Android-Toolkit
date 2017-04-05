@@ -38,10 +38,11 @@ public class ConnectionActivity extends ToolBarActivity {
     @BindView(R.id.operate_connection) Button mOperateConnectionButton;
 
     private int mMode;
+
     private Connection mConnection;
 
     @IntDef({MODE_ADD, MODE_EDIT})
-    public @interface mode {
+    @interface mode {
 
     }
 
@@ -118,7 +119,7 @@ public class ConnectionActivity extends ToolBarActivity {
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    Connection connection = realm.where(Connection.class).equalTo("clientId", mConnection.getClientId()).findFirst();
+                    Connection connection = realm.where(Connection.class).equalTo("id", mConnection.getId()).findFirst();
                     mConnection = updateConnection(connection);
 
                 }
@@ -159,6 +160,7 @@ public class ConnectionActivity extends ToolBarActivity {
         connection.setCleanSession(cleanSession);
         connection.setUsername(username);
         connection.setPassword(password);
+        connection.generateId();
         return connection;
     }
 

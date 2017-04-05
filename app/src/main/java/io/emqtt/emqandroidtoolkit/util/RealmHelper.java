@@ -93,7 +93,7 @@ public class RealmHelper {
         });
     }
 
-    public <T extends RealmObject> void deleteTopic(Class<T> clazz, String topic) {
+    public <T extends RealmObject> void deleteTopicMessage(Class<T> clazz, String topic) {
         final RealmResults results = mRealm.where(clazz)
                 .equalTo("topic", topic)
                 .findAll();

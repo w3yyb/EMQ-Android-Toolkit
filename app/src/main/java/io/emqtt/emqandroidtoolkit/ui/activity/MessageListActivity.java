@@ -93,7 +93,7 @@ public class MessageListActivity extends ToolBarActivity {
         int id = item.getItemId();
         if (id == R.id.action_delete) {
             mAdapter.deleteAll();
-            RealmHelper.getInstance().deleteTopic(EmqMessage.class, mSubscription.getTopic());
+            RealmHelper.getInstance().deleteTopicMessage(EmqMessage.class, mSubscription.getTopic());
             return true;
         }
 
