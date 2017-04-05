@@ -37,7 +37,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(MessageViewHolder holder, int position) {
         EmqMessage message = mMessageList.get(position);
-        holder.payloadText.setText("Payload:" + message.getPayload());
+        holder.payloadText.setText("Payload:\n" + message.getPayload());
         holder.timeText.setText(message.getUpdateTime());
         holder.qosText.setText("QoS:" + message.getQos());
         holder.retainedText.setText("Retained:" + message.isRetained());

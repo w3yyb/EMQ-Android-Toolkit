@@ -13,26 +13,33 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             tools:text="Message from MQTT"/>
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/qos"
-            tools:text="QoS:1"
-    />
 
-    <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/retained"
-            tools:text="Retained"
-    />
 
-    <TextView
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="3-27 12:00:24"
-    />
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_marginTop="@dimen/space_small"
+            android:layout_height="wrap_content">
+        <TextView
+                android:id="@+id/qos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="QoS:1"/>
+
+        <TextView
+                android:id="@+id/retained"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/qos"
+                android:layout_marginStart="@dimen/space_large"
+                tools:text="Retained"/>
+
+        <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                tools:text="3-27 12:00:24"/>
+    </RelativeLayout>
 
 
 </LinearLayout>
