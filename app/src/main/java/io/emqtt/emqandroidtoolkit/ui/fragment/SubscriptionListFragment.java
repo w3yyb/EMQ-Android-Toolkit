@@ -82,12 +82,18 @@ public class SubscriptionListFragment extends BaseFragment {
     }
 
     public void addData(Subscription subscription){
-        if (!mTopicList.contains(subscription.getTopic())){
-            mAdapter.addData(subscription);
-            mTopicList.add(subscription.getTopic());
-        }
+        if (subscription != null) {
+            if (!mTopicList.contains(subscription.getTopic())) {
+                mAdapter.addData(subscription);
+                mTopicList.add(subscription.getTopic());
+            }else {
+                mAdapter.updateSubscription(subscription);
 
+            }
+
+        }
     }
+
 
     public void updateData(EmqMessage emqMessage){
         if (mTopicList.contains(emqMessage.getTopic())) {

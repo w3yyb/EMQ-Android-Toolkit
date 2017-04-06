@@ -8,27 +8,18 @@
         android:layout_margin="@dimen/space_tiny"
         android:foreground="?android:attr/selectableItemBackground"
         android:clickable="true"
+        android:focusable="true"
         android:theme="@style/CardView.Light">
     <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/space_small">
 
-        <TextView
-                android:id="@+id/display_name"
-                android:visibility="gone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceListItem"
-                tools:text="@string/topic"/>
-
 
         <TextView
                 android:id="@+id/topic"
-                android:visibility="visible"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/display_name"
                 android:textAppearance="?attr/textAppearanceListItem"
                 tools:text="Topic"/>
 

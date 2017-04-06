@@ -61,10 +61,14 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     private MqttAsyncClient mClient;
     private ConnectionViewPagerAdapter mAdapter;
 
+    private SubscriptionListFragment mSubscriptionListFragment;
+    private PublicationListFragment mPublicationListFragment;
+
     private RealmResults<Subscription> mSubscriptionResults;
     private List<Subscription> mSubscriptionList;
 
     private int mCurrentMode = SUBSCRIPTION;
+
 
     public static void openActivity(Context context, Connection connection) {
         Intent intent = new Intent(context, DashboardActivity.class);
@@ -126,8 +130,8 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     @Override
     public void onItemDelete(int position, Subscription item) {
-        RealmHelper.getInstance().delete(mSubscriptionResults.get(position));
         unsubscribe(item);
+        RealmHelper.getInstance().delete(mSubscriptionResults.get(position));
     }
 
     @Override
@@ -241,9 +245,15 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
                 break;
 
             case Constant.MQTTStatusConstant.SUBSCRIBE_SUCCESS:
-                TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.subscribe_success));
-                SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
-                subscriptionListFragment.addData(mSubscription);
+                TipUtil.showSnackbar(mCoordinatorLayout, getString(R.string.subscribe_success));
+                RealmHelper.getInstance().getRealm()
+                        .executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                mSubscription.setSubscribed(true);
+                            }
+                        });
+                mSubscriptionListFragment.addData(mSubscription);
 
                 break;
 
@@ -252,17 +262,23 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
                 break;
 
             case Constant.MQTTStatusConstant.UNSUBSCRIBE_SUCCESS:
-                TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.unsubscurbe_success));
+                TipUtil.showSnackbar(mCoordinatorLayout, getString(R.string.unsubscurbe_success));
+                RealmHelper.getInstance().getRealm()
+                        .executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                mSubscription.setSubscribed(false);
+                            }
+                        });
+                mSubscriptionListFragment.addData(mSubscription);
                 break;
 
             case Constant.MQTTStatusConstant.UNSUBSCRIBE_FAIL:
                 TipUtil.showSnackbar(mCoordinatorLayout,getString(R.string.unsubscirbe_fail));
-
                 break;
 
             case Constant.MQTTStatusConstant.PUBLISH_SUCCESS:
-                PublicationListFragment fragment = (PublicationListFragment) mAdapter.getItem(1);
-                fragment.insertData(mPublication);
+                mPublicationListFragment.insertData(mPublication);
                 break;
 
             case Constant.MQTTStatusConstant.PUBLISH_FAIL:
@@ -315,12 +331,14 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
     @Override
     public void onStop() {
         super.onStop();
-        EventBus.getDefault().removeAllStickyEvents();
         EventBus.getDefault().unregister(this);
     }
 
-
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().removeAllStickyEvents();
+    }
 
     private void setSubtitle(String subtitle) {
         if (mToolbar != null) {
@@ -343,12 +361,12 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
 
     private void setUpTabLayout() {
-        SubscriptionListFragment subscriptionListFragment = SubscriptionListFragment.newInstance();
-        PublicationListFragment publicationListFragment = PublicationListFragment.newInstance();
+        mSubscriptionListFragment = SubscriptionListFragment.newInstance();
+        mPublicationListFragment = PublicationListFragment.newInstance();
 
         mAdapter = new ConnectionViewPagerAdapter(getSupportFragmentManager());
-        mAdapter.addFragment(subscriptionListFragment, SubscriptionListFragment.TAG);
-        mAdapter.addFragment(publicationListFragment, PublicationListFragment.TAG);
+        mAdapter.addFragment(mSubscriptionListFragment, SubscriptionListFragment.TAG);
+        mAdapter.addFragment(mPublicationListFragment, PublicationListFragment.TAG);
 
         mViewpager.setAdapter(mAdapter);
         mTabLayout.setupWithViewPager(mViewpager);
@@ -385,6 +403,10 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     }
 
+    /**
+     * Get custom tab view
+     * @return custom tab view
+     */
     private View getView() {
         View view = LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         TextView textView = (TextView) view.findViewById(R.id.title);
@@ -392,6 +414,10 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         return view;
     }
 
+    /**
+     * update tab view with message status
+     * @param isShow isShow
+     */
     private void updateView(boolean isShow) {
         View view = mTabLayout.getTabAt(0).getCustomView();
         ImageView imageView = (ImageView) view.findViewById(R.id.status);
@@ -406,7 +432,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     private void initClient() {
         mMQTTManager = MQTTManager.getInstance();
-        mClient = mMQTTManager.getClient(mConnection.toString());
+        mClient = mMQTTManager.getClient(mConnection.getId());
         if (mClient == null) {
             mClient = mMQTTManager.createClient(mConnection.getId(), mConnection.getServerURI(), mConnection.getClientId());
         }
@@ -431,8 +457,9 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         mMQTTManager.subscribe(mClient,subscription.getTopic(), subscription.getQoS());
     }
 
-    private void unsubscribe(Subscription subscription){
-        mMQTTManager.unsubscribe(mClient,subscription.getTopic());
+    private void unsubscribe(Subscription subscription) {
+        mSubscription = subscription;
+        mMQTTManager.unsubscribe(mClient, subscription.getTopic());
     }
 
     private void publish(Publication publication){

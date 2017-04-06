@@ -50,13 +50,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     public void insertData(EmqMessage message) {
-        mMessageList.add(message);
         notifyItemInserted(getItemCount());
 
     }
 
     public void deleteAll() {
-        mMessageList.clear();
         notifyDataSetChanged();
     }
 

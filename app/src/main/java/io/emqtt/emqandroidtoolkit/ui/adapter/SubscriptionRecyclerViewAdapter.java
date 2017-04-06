@@ -1,6 +1,5 @@
 package io.emqtt.emqandroidtoolkit.ui.adapter;
 
-import android.content.Context;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -26,7 +25,6 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     private final List<Subscription> mSubscriptionList;
     private ArrayMap<String ,Integer> mArrayMap;
     private final OnListFragmentInteractionListener mListener;
-    private Context mContext;
 
 
     public SubscriptionRecyclerViewAdapter(List<Subscription> items, OnListFragmentInteractionListener listener) {
@@ -42,7 +40,6 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_subscription, parent, false);
-        mContext = parent.getContext();
         return new ViewHolder(view);
     }
 
@@ -62,7 +59,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         holder.moreImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showMenu(v, pos, subscription);
+                showMenu(holder, pos, subscription);
 
             }
         });
@@ -75,6 +72,9 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
                 }
             }
         });
+
+        holder.popMenu.getMenu().findItem(R.id.action_subscribe).setEnabled(!subscription.isSubscribed());
+        holder.popMenu.getMenu().findItem(R.id.action_unsubscribe).setEnabled(subscription.isSubscribed());
     }
 
     @Override
@@ -82,10 +82,8 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         return mSubscriptionList.size();
     }
 
-    private void showMenu(View v, final int position, final Subscription subscription) {
-        final PopupMenu popupMenu = new PopupMenu(mContext, v);
-        popupMenu.inflate(R.menu.menu_subscription);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+    private void showMenu(ViewHolder holder, final int position, final Subscription subscription) {
+        holder.popMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -114,17 +112,24 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
                 }
             }
         });
-        popupMenu.show();
+        holder.popMenu.show();
     }
 
-    public void addData(Subscription subscription){
+    public void addData(Subscription subscription) {
         if (mArrayMap.containsKey(subscription.getTopic())) {
             mSubscriptionList.set(mArrayMap.get(subscription.getTopic()), subscription);
+            notifyItemChanged(mArrayMap.get(subscription.getTopic()));
         } else {
             mSubscriptionList.add(subscription);
             mArrayMap.put(subscription.getTopic(), mSubscriptionList.size() - 1);
+            notifyItemInserted(mSubscriptionList.size() - 1);
         }
-        notifyDataSetChanged();
+    }
+
+    public void updateSubscription(Subscription subscription) {
+        int pos = mArrayMap.get(subscription.getTopic());
+        notifyItemChanged(pos);
+
     }
 
     public void updateData(EmqMessage emqMessage) {
@@ -145,8 +150,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     }
 
 
-
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.topic) TextView topicText;
         @BindView(R.id.QoS) TextView QoSText;
@@ -154,9 +158,14 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         @BindView(R.id.time) TextView timeText;
         @BindView(R.id.more) ImageView moreImage;
 
+        public PopupMenu popMenu;
+
         ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, itemView);
+            popMenu = new PopupMenu(itemView.getContext(), moreImage);
+            popMenu.inflate(R.menu.menu_subscription);
+
 
         }
 

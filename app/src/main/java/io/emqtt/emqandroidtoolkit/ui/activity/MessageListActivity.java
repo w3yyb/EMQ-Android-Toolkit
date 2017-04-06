@@ -12,9 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.BindView;
 import io.emqtt.emqandroidtoolkit.Constant;
 import io.emqtt.emqandroidtoolkit.R;
@@ -36,7 +33,6 @@ public class MessageListActivity extends ToolBarActivity {
 
     private Subscription mSubscription;
 
-    private List<EmqMessage> mMessageList;
 
     public static void openActivity(Context context, Subscription subscription){
         Intent intent = new Intent(context, MessageListActivity.class);
@@ -61,10 +57,8 @@ public class MessageListActivity extends ToolBarActivity {
 
     @Override
     protected void setUpData() {
-        mMessageList = new ArrayList<>();
         RealmResults<EmqMessage> list = RealmHelper.getInstance().queryTopicMessage(EmqMessage.class, mSubscription.getTopic());
-        mMessageList.addAll(list);
-        mAdapter = new MessageAdapter(mMessageList);
+        mAdapter = new MessageAdapter(list);
         mMessageRecyclerView.setAdapter(mAdapter);
 
     }
@@ -92,8 +86,8 @@ public class MessageListActivity extends ToolBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_delete) {
-            mAdapter.deleteAll();
             RealmHelper.getInstance().deleteTopicMessage(EmqMessage.class, mSubscription.getTopic());
+            mAdapter.deleteAll();
             return true;
         }
 

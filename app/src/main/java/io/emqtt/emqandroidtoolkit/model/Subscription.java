@@ -22,6 +22,8 @@ public class Subscription extends RealmObject implements Parcelable {
     @QoSConstant.QoS
     int QoS;
 
+    private boolean isSubscribed;
+
 
     @Ignore
     private EmqMessage message;
@@ -58,6 +60,13 @@ public class Subscription extends RealmObject implements Parcelable {
         QoS = qoS;
     }
 
+    public boolean isSubscribed() {
+        return isSubscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        isSubscribed = subscribed;
+    }
 
     public EmqMessage getMessage() {
         return message;
