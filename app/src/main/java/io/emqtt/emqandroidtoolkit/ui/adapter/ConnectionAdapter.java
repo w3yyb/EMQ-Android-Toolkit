@@ -18,7 +18,6 @@ import io.emqtt.emqandroidtoolkit.R;
 import io.emqtt.emqandroidtoolkit.model.Connection;
 import io.emqtt.emqandroidtoolkit.ui.OnItemClickListener;
 import io.emqtt.emqandroidtoolkit.ui.activity.DashboardActivity;
-import io.emqtt.emqandroidtoolkit.util.RealmHelper;
 
 /**
  * ClassName: ConnectionAdapter
@@ -90,7 +89,6 @@ public class ConnectionAdapter extends RecyclerView.Adapter<ConnectionAdapter.Co
                             mOnItemClickListener.onItemDelete(position, connection);
                         }
 
-                        RealmHelper.getInstance().delete(connection);
                         mConnectionList.remove(position);
                         notifyItemRemoved(position);
                         notifyItemRangeChanged(position, getItemCount());

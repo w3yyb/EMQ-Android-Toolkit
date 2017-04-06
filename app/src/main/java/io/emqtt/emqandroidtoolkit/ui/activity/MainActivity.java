@@ -41,6 +41,7 @@ public class MainActivity extends BaseActivity {
     private ConnectionAdapter mConnectionAdapter;
 
     private int mPosition;
+    private RealmResults<Connection> mConnectionResults;
 
     @Override
     protected int getLayoutResId() {
@@ -61,9 +62,9 @@ public class MainActivity extends BaseActivity {
     protected void setUpData() {
 
         mConnectionList = new ArrayList<>();
-        RealmResults<Connection> list = RealmHelper.getInstance().queryAll(Connection.class);
-        if (list != null) {
-            mConnectionList.addAll(list);
+        mConnectionResults = RealmHelper.getInstance().queryAll(Connection.class);
+        if (mConnectionResults != null) {
+            mConnectionList.addAll(mConnectionResults);
         }
 
         mConnectionAdapter = new ConnectionAdapter(mConnectionList);
@@ -72,11 +73,12 @@ public class MainActivity extends BaseActivity {
             public void onItemEdit(int position, Object item) {
                 ConnectionActivity.openActivityForResult(MainActivity.this, ConnectionActivity.MODE_EDIT, REQUEST_EDIT, (Connection) item);
                 mPosition = position;
+
             }
 
             @Override
             public void onItemDelete(int position, Object item) {
-                mPosition = position;
+                RealmHelper.getInstance().delete(mConnectionResults.get(position));
 
             }
         });

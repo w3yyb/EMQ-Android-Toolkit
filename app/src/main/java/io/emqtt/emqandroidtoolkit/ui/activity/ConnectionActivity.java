@@ -79,6 +79,7 @@ public class ConnectionActivity extends ToolBarActivity {
         mMode = getIntent().getIntExtra(EXTRA_MODE, MODE_ADD);
         if (isAddMode()) {
             mOperateConnectionButton.setText(R.string.add_connection);
+            mClientId.setText(getRandomClientId());
         } else {
             mOperateConnectionButton.setText(R.string.save_connection);
             mConnection = getIntent().getParcelableExtra(EXTRA_CONNECTION);
@@ -87,6 +88,11 @@ public class ConnectionActivity extends ToolBarActivity {
         }
 
 
+    }
+
+    private String getRandomClientId() {
+        int randNum = (int) (Math.random() * 99999);
+        return "EMQ-" + randNum;
     }
 
 
