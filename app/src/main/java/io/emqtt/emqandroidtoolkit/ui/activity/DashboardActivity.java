@@ -8,7 +8,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -69,6 +68,8 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     private int mCurrentMode = SUBSCRIPTION;
 
+    private boolean mIsDelete;
+
 
     public static void openActivity(Context context, Connection connection) {
         Intent intent = new Intent(context, DashboardActivity.class);
@@ -88,23 +89,8 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
         mToolbar.setTitle(mConnection.getServerURI());
         setSupportActionBar(mToolbar);
         setSubtitle(getString(R.string.connecting) );
-        mToolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                displayDialog();
-
-            }
-        });
     }
 
-    private void displayDialog() {
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
-        View view = LayoutInflater.from(this).inflate(R.layout.dialog_connection_status, null);
-        ((TextView)view.findViewById(R.id.server)).setText(mConnection.getServerURI());
-        ((TextView)view.findViewById(R.id.client_id)).setText(mConnection.getClientId());
-        dialog.setContentView(view);
-        dialog.show();
-    }
 
     @Override
     protected void setUpData() {
@@ -130,6 +116,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     @Override
     public void onItemDelete(int position, Subscription item) {
+        mIsDelete = true;
         unsubscribe(item);
         RealmHelper.getInstance().delete(mSubscriptionResults.get(position));
     }
@@ -141,6 +128,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     @Override
     public void onItemUnsubscribe(int position, Subscription item) {
+        mIsDelete = false;
         unsubscribe(item);
 
     }
@@ -218,8 +206,6 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
         if (mCurrentMode == SUBSCRIPTION) {
             startActivityForResult(SubscriptionActivity.class, SUBSCRIPTION);
-//            SubscriptionFragment subscriptionFragment = new SubscriptionFragment();
-//            subscriptionFragment.show(getFragmentManager(), "SubscriptionFragment");
         }else if (mCurrentMode == PUBLICATION){
             startActivityForResult(PublicationActivity.class, PUBLICATION);
         }
@@ -253,7 +239,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
                                 mSubscription.setSubscribed(true);
                             }
                         });
-                mSubscriptionListFragment.addData(mSubscription);
+                mSubscriptionListFragment.updateSubscription(mSubscription);
 
                 break;
 
@@ -262,15 +248,18 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
                 break;
 
             case Constant.MQTTStatusConstant.UNSUBSCRIBE_SUCCESS:
-                TipUtil.showSnackbar(mCoordinatorLayout, getString(R.string.unsubscurbe_success));
-                RealmHelper.getInstance().getRealm()
-                        .executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                mSubscription.setSubscribed(false);
-                            }
-                        });
-                mSubscriptionListFragment.addData(mSubscription);
+                if (!mIsDelete){
+                    TipUtil.showSnackbar(mCoordinatorLayout, getString(R.string.unsubscurbe_success));
+                    RealmHelper.getInstance().getRealm()
+                            .executeTransaction(new Realm.Transaction() {
+                                @Override
+                                public void execute(Realm realm) {
+                                    mSubscription.setSubscribed(false);
+                                }
+                            });
+                    mSubscriptionListFragment.updateSubscription(mSubscription);
+                }
+
                 break;
 
             case Constant.MQTTStatusConstant.UNSUBSCRIBE_FAIL:
@@ -299,8 +288,7 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(MessageEvent event){
-        SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
-        subscriptionListFragment.updateData(event.getMessage());
+        mSubscriptionListFragment.updateMessage(event.getMessage());
         updateView(true);
         RealmHelper.getInstance().addData(event.getMessage());
     }
@@ -315,17 +303,6 @@ public class DashboardActivity extends BaseActivity implements SubscriptionListF
 
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        MessageEvent event = EventBus.getDefault().getStickyEvent(MessageEvent.class);
-        if (event != null) {
-            SubscriptionListFragment subscriptionListFragment = (SubscriptionListFragment) mAdapter.getItem(0);
-            subscriptionListFragment.updateData(event.getMessage());
-        }
-
-    }
 
 
     @Override

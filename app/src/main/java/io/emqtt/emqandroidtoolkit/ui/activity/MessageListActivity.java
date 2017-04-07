@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import butterknife.BindView;
 import io.emqtt.emqandroidtoolkit.Constant;
 import io.emqtt.emqandroidtoolkit.R;
+import io.emqtt.emqandroidtoolkit.event.DeleteTopicMessageEvent;
 import io.emqtt.emqandroidtoolkit.event.MessageEvent;
 import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
@@ -32,6 +33,9 @@ public class MessageListActivity extends ToolBarActivity {
     private MessageAdapter mAdapter;
 
     private Subscription mSubscription;
+
+    private boolean mIsDelete;
+    private long mDeleteTime;
 
 
     public static void openActivity(Context context, Subscription subscription){
@@ -70,6 +74,14 @@ public class MessageListActivity extends ToolBarActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (mIsDelete) {
+            EventBus.getDefault().postSticky(new DeleteTopicMessageEvent(new EmqMessage(mSubscription.getTopic(), null), mDeleteTime));
+        }
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
@@ -88,6 +100,8 @@ public class MessageListActivity extends ToolBarActivity {
         if (id == R.id.action_delete) {
             RealmHelper.getInstance().deleteTopicMessage(EmqMessage.class, mSubscription.getTopic());
             mAdapter.deleteAll();
+            mIsDelete = true;
+            mDeleteTime = System.currentTimeMillis();
             return true;
         }
 

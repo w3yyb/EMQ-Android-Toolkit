@@ -75,6 +75,10 @@ public class RealmHelper {
         return mRealm.where(clazz).equalTo("topic", topic).findAll();
     }
 
+    public <T extends RealmObject> T queryFirstTopicMessage(Class<T> clazz, String topic) {
+        return mRealm.where(clazz).equalTo("topic", topic).findFirst();
+    }
+
 
     public <T extends RealmObject> void delete(T data) {
         mRealm.beginTransaction();

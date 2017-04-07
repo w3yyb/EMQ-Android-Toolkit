@@ -41,11 +41,14 @@ public class EmqMessage extends RealmObject {
         this.mqttMessage = mqttMessage;
         this.updateTime = StringUtil.formatNow();
 
-        this.dup = mqttMessage.isDuplicate();
-        this.payload = new String(mqttMessage.getPayload());
-        this.qos = mqttMessage.getQos();
-        this.messageId = mqttMessage.getId();
-        this.retained = mqttMessage.isRetained();
+        if (mqttMessage != null) {
+            this.dup = mqttMessage.isDuplicate();
+            this.payload = new String(mqttMessage.getPayload());
+            this.qos = mqttMessage.getQos();
+            this.messageId = mqttMessage.getId();
+            this.retained = mqttMessage.isRetained();
+        }
+
 
     }
 

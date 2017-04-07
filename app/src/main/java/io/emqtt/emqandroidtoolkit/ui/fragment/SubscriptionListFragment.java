@@ -1,5 +1,7 @@
 package io.emqtt.emqandroidtoolkit.ui.fragment;
 
+import org.greenrobot.eventbus.EventBus;
+
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,11 +11,15 @@ import java.util.List;
 
 import butterknife.BindView;
 import io.emqtt.emqandroidtoolkit.R;
+import io.emqtt.emqandroidtoolkit.event.DeleteTopicMessageEvent;
+import io.emqtt.emqandroidtoolkit.event.MessageEvent;
 import io.emqtt.emqandroidtoolkit.model.EmqMessage;
 import io.emqtt.emqandroidtoolkit.model.Subscription;
 import io.emqtt.emqandroidtoolkit.ui.activity.DashboardActivity;
 import io.emqtt.emqandroidtoolkit.ui.adapter.SubscriptionRecyclerViewAdapter;
 import io.emqtt.emqandroidtoolkit.ui.base.BaseFragment;
+import io.emqtt.emqandroidtoolkit.util.RealmHelper;
+import io.emqtt.emqandroidtoolkit.util.StringUtil;
 
 /**
  *
@@ -56,6 +62,10 @@ public class SubscriptionListFragment extends BaseFragment {
     protected void setUpData() {
         List<Subscription> list = ((DashboardActivity) fragmentActivity).getSubscriptionList();
         for (Subscription subscription : list) {
+            EmqMessage emqMessage = RealmHelper.getInstance().queryFirstTopicMessage(EmqMessage.class, subscription.getTopic());
+            if (emqMessage != null) {
+                subscription.setMessage(emqMessage);
+            }
             mTopicList.add(subscription.getTopic());
         }
         mAdapter = new SubscriptionRecyclerViewAdapter(list, mListener);
@@ -81,7 +91,38 @@ public class SubscriptionListFragment extends BaseFragment {
         mListener = null;
     }
 
-    public void addData(Subscription subscription){
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateTopicMessage();
+    }
+
+    /**
+     * Deal with the {@link DeleteTopicMessageEvent} and {@link MessageEvent},
+     * if both are not null,choose the latest to update;
+     * otherwise update the message which is not null.
+     */
+    private void updateTopicMessage() {
+        DeleteTopicMessageEvent deleteTopicMessageEvent = EventBus.getDefault().getStickyEvent(DeleteTopicMessageEvent.class);
+        MessageEvent messageEvent = EventBus.getDefault().getStickyEvent(MessageEvent.class);
+        if (deleteTopicMessageEvent != null & messageEvent != null) {
+            long deleteTime = deleteTopicMessageEvent.getDeleteTime();
+            long messageTime = StringUtil.getTimeStamp(messageEvent.getMessage().getUpdateTime());
+            if (deleteTime > messageTime) {
+                updateMessage(deleteTopicMessageEvent.getMessage());
+            } else {
+                updateMessage(messageEvent.getMessage());
+            }
+
+        } else if (deleteTopicMessageEvent != null) {
+            updateMessage(deleteTopicMessageEvent.getMessage());
+        } else if (messageEvent != null) {
+            updateMessage(messageEvent.getMessage());
+        }
+    }
+
+
+    public void updateSubscription(Subscription subscription){
         if (subscription != null) {
             if (!mTopicList.contains(subscription.getTopic())) {
                 mAdapter.addData(subscription);
@@ -95,7 +136,7 @@ public class SubscriptionListFragment extends BaseFragment {
     }
 
 
-    public void updateData(EmqMessage emqMessage){
+    public void updateMessage(EmqMessage emqMessage){
         if (mTopicList.contains(emqMessage.getTopic())) {
             mAdapter.updateData(emqMessage);
         }

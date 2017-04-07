@@ -52,8 +52,11 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         holder.topicText.setText("Topic:" + subscription.getTopic());
         holder.QoSText.setText("QoSText:" + subscription.getQoS());
         if (null != subscription.getMessage()) {
-            holder.payloadText.setText(new String(subscription.getMessage().getMqttMessage().getPayload()));
+            holder.payloadText.setText(subscription.getMessage().getPayload());
             holder.timeText.setText(subscription.getMessage().getUpdateTime());
+        }else {
+            holder.payloadText.setText("");
+            holder.timeText.setText("");
         }
 
         holder.moreImage.setOnClickListener(new View.OnClickListener() {
@@ -136,13 +139,16 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         String topic = emqMessage.getTopic();
         int position = mArrayMap.get(topic);
         Subscription subscription = mSubscriptionList.get(position);
+        if (emqMessage.getMqttMessage() == null) {
+            emqMessage.setPayload("");
+            emqMessage.setUpdateTime("");
+        }
         subscription.setMessage(emqMessage);
         notifyItemChanged(position, subscription);
 
-
     }
 
-    public void removeData(int position){
+    private void removeData(int position){
         mSubscriptionList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position,getItemCount());
@@ -150,7 +156,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
     }
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.topic) TextView topicText;
         @BindView(R.id.QoS) TextView QoSText;
@@ -158,7 +164,7 @@ public class SubscriptionRecyclerViewAdapter extends RecyclerView.Adapter<Subscr
         @BindView(R.id.time) TextView timeText;
         @BindView(R.id.more) ImageView moreImage;
 
-        public PopupMenu popMenu;
+        PopupMenu popMenu;
 
         ViewHolder(View view) {
             super(view);
